@@ -418,6 +418,210 @@ app.post('/api/generate-content', async (c) => {
   }
 })
 
+// Save document with version history
+app.post('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured - documents will not be saved', demo: true }, 503)
+    }
+    
+    const { type, candidateName, position, documentData, originalPdfText, uploadFilename, extractionMethod } = await c.req.json()
+    
+    // Save main document
+    const result = await c.env.DB.prepare(
+      `INSERT INTO documents (type, candidate_name, position, document_data, original_pdf_text, upload_filename, extraction_method) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      type, 
+      candidateName, 
+      position, 
+      JSON.stringify(documentData),
+      originalPdfText || null,
+      uploadFilename || null,
+      extractionMethod || null
+    ).run()
+    
+    const documentId = result.meta.last_row_id
+    
+    // Create first version entry
+    if (documentId) {
+      await c.env.DB.prepare(
+        'INSERT INTO document_versions (document_id, version_number, document_data, changes_description) VALUES (?, ?, ?, ?)'
+      ).bind(documentId, 1, JSON.stringify(documentData), 'Initial version').run()
+    }
+    
+    return c.json({ success: true, id: documentId, message: 'Document saved with version history' })
+  } catch (error) {
+    console.error('Save document error:', error)
+    return c.json({ error: 'Failed to save document', details: error instanceof Error ? error.message : 'Unknown' }, 500)
+  }
+})
+
+// Get all documents
+app.get('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ documents: [], demo: true })
+    }
+    
+    const { results } = await c.env.DB.prepare(
+      `SELECT id, type, candidate_name, position, upload_filename, extraction_method, created_at 
+       FROM documents ORDER BY created_at DESC LIMIT 100`
+    ).all()
+    
+    return c.json({ documents: results, count: results.length })
+  } catch (error) {
+    return c.json({ documents: [], error: 'Failed to fetch documents' }, 500)
+  }
+})
+
+// Get single document with versions
+app.get('/api/documents/:id', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const id = c.req.param('id')
+    
+    // Get document
+    const doc = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ?').bind(id).first()
+    
+    if (!doc) {
+      return c.json({ error: 'Document not found' }, 404)
+    }
+    
+    // Get versions
+    const { results: versions } = await c.env.DB.prepare(
+      'SELECT * FROM document_versions WHERE document_id = ? ORDER BY version_number DESC'
+    ).bind(id).all()
+    
+    return c.json({ document: doc, versions: versions })
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch document' }, 500)
+  }
+})
+
+// Compare two documents
+app.post('/api/documents/compare', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const { originalId, modifiedId } = await c.req.json()
+    
+    // Get both documents
+    const original = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ?').bind(originalId).first()
+    const modified = await c.env.DB.prepare('SELECT * FROM documents WHERE id = ?').bind(modifiedId).first()
+    
+    if (!original || !modified) {
+      return c.json({ error: 'One or both documents not found' }, 404)
+    }
+    
+    // Parse document data
+    const originalData = JSON.parse(original.document_data as string)
+    const modifiedData = JSON.parse(modified.document_data as string)
+    
+    // Compare fields
+    const differences: any = {}
+    const allKeys = new Set([...Object.keys(originalData), ...Object.keys(modifiedData)])
+    
+    allKeys.forEach(key => {
+      if (originalData[key] !== modifiedData[key]) {
+        differences[key] = {
+          original: originalData[key],
+          modified: modifiedData[key]
+        }
+      }
+    })
+    
+    // Save comparison
+    await c.env.DB.prepare(
+      'INSERT INTO document_comparisons (original_document_id, modified_document_id, comparison_data) VALUES (?, ?, ?)'
+    ).bind(originalId, modifiedId, JSON.stringify(differences)).run()
+    
+    return c.json({
+      success: true,
+      original: { id: originalId, name: original.candidate_name, data: originalData },
+      modified: { id: modifiedId, name: modified.candidate_name, data: modifiedData },
+      differences: differences,
+      differenceCount: Object.keys(differences).length
+    })
+  } catch (error) {
+    return c.json({ error: 'Comparison failed', details: error instanceof Error ? error.message : 'Unknown' }, 500)
+  }
+})
+
+// Batch upload - create batch
+app.post('/api/batch/create', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const { batchName, totalFiles } = await c.req.json()
+    
+    const result = await c.env.DB.prepare(
+      'INSERT INTO batch_uploads (batch_name, total_files, status) VALUES (?, ?, ?)'
+    ).bind(batchName || 'Batch ' + new Date().toISOString(), totalFiles, 'pending').run()
+    
+    return c.json({ success: true, batchId: result.meta.last_row_id })
+  } catch (error) {
+    return c.json({ error: 'Failed to create batch' }, 500)
+  }
+})
+
+// Batch upload - add document to batch
+app.post('/api/batch/:batchId/add', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const batchId = c.req.param('batchId')
+    const { documentId, filename, status, errorMessage } = await c.req.json()
+    
+    await c.env.DB.prepare(
+      'INSERT INTO batch_upload_documents (batch_id, document_id, filename, status, error_message) VALUES (?, ?, ?, ?, ?)'
+    ).bind(batchId, documentId || null, filename, status || 'completed', errorMessage || null).run()
+    
+    // Update batch progress
+    await c.env.DB.prepare(
+      'UPDATE batch_uploads SET processed_files = processed_files + 1 WHERE id = ?'
+    ).bind(batchId).run()
+    
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ error: 'Failed to add to batch' }, 500)
+  }
+})
+
+// Get batch status
+app.get('/api/batch/:batchId', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const batchId = c.req.param('batchId')
+    
+    const batch = await c.env.DB.prepare('SELECT * FROM batch_uploads WHERE id = ?').bind(batchId).first()
+    
+    if (!batch) {
+      return c.json({ error: 'Batch not found' }, 404)
+    }
+    
+    const { results: documents } = await c.env.DB.prepare(
+      'SELECT * FROM batch_upload_documents WHERE batch_id = ?'
+    ).bind(batchId).all()
+    
+    return c.json({ batch, documents })
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch batch' }, 500)
+  }
+})
+
 // Homepage with navigation, hero, features, testimonials
 app.get('/', (c) => {
   return c.html(`
