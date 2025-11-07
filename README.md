@@ -9,7 +9,7 @@
   - 🧭 **Navigation Menu** with smooth scrolling to Home, Features, Templates, Upload, Testimonials, About
   - 📄 **Interactive Document Generation** for offer letters and certificates
   - 🤖 **AI-Powered Content** with smart templates and auto-fill
-  - 📤 **PDF Upload & Edit** - Upload existing documents and modify them
+  - 📤 **PDF Upload & Edit** - Upload existing PDFs, AI extracts & auto-fills forms ✅ **LIVE**
   - ⭐ **Testimonials Section** with customer reviews (6 testimonials)
   - 📊 **Templates Showcase** - Display of all 20 templates by category
   - 📱 **Fully Responsive** mobile-friendly design
@@ -18,7 +18,7 @@
 
 ## URLs
 - **🌐 Production**: https://passion3d-docs.pages.dev (Cloudflare Pages)
-- **📦 Latest Deployment**: https://1a9d8c5d.passion3d-docs.pages.dev
+- **📦 Latest Deployment**: https://6ac1ccd9.passion3d-docs.pages.dev (PDF Upload Feature)
 - **Development**: https://3000-i8k1j0dusjnrkrmd40c5e-2e1b9533.sandbox.novita.ai
 - **Home**: `/` - Main landing page with navigation
 - **Offer Letter Generator**: `/offer-letter` - Create customized internship offer letters
@@ -49,7 +49,7 @@
 - **Natural Language Processing**: Understands descriptions like "R&D Intern for video editing, 6 months, ₹5000, WFH"
 - **Demo Mode**: Works without API keys using smart pattern matching
 - **Real-time Generation**: Instant AI-powered content suggestions
-- **PDF Upload Processing**: Upload existing PDFs for AI extraction and modification (UI ready)
+- **PDF Upload Processing**: Upload existing PDFs, extract text with PDF.js, AI processes and pre-fills forms ✅ **FULLY FUNCTIONAL**
 
 ### ✅ Offer Letter Generator
 - **AI Auto-Fill**: Describe position and AI fills the entire form automatically
