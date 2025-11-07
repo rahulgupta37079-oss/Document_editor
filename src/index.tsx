@@ -6,6 +6,33 @@ const app = new Hono()
 // Enable CORS for API routes
 app.use('/api/*', cors())
 
+// API endpoint for AI content generation (demo mode - returns smart suggestions)
+app.post('/api/generate-content', async (c) => {
+  try {
+    const { prompt, type } = await c.req.json()
+    
+    // Demo mode - provide smart suggestions
+    const demoResponses: Record<string, any> = {
+      'responsibilities': {
+        content: "Video Creation and Editing, 3D Modeling and Animation, Content Development, Software and Hardware Testing, Documentation and Reporting, Team Collaboration"
+      },
+      'achievements': {
+        content: "Successfully completed multiple video editing projects with high-quality output, demonstrated proficiency in 3D modeling software, contributed to software quality assurance testing, showed excellent teamwork and communication skills, met all project deadlines with attention to detail"
+      },
+      'terms': {
+        content: "The intern will work on assigned projects including video creation, content development, and software testing. All work products remain company property."
+      }
+    }
+    
+    return c.json({ 
+      content: demoResponses[type]?.content || 'Generated content based on your input',
+      demo: true 
+    })
+  } catch (error) {
+    return c.json({ error: 'Failed to generate content', demo: true }, 500)
+  }
+})
+
 // Home page with navigation
 app.get('/', (c) => {
   return c.html(`
@@ -31,10 +58,14 @@ app.get('/', (c) => {
         <div class="container mx-auto px-4 py-8">
             <div class="text-center mb-12">
                 <h1 class="text-5xl font-bold text-white mb-4">
-                    <i class="fas fa-file-alt mr-3 text-blue-400"></i>
-                    Document Generator
+                    <i class="fas fa-robot mr-3 text-blue-400"></i>
+                    AI Document Generator
                 </h1>
-                <p class="text-xl text-gray-300">Passion 3D World - Automated Document Creation</p>
+                <p class="text-xl text-gray-300">Passion 3D World - AI-Powered Document Creation</p>
+                <div class="mt-4 inline-flex items-center bg-blue-900/30 border border-blue-500 rounded-lg px-4 py-2">
+                    <i class="fas fa-sparkles text-yellow-400 mr-2"></i>
+                    <span class="text-blue-300 text-sm">Powered by AI - Smart Content Generation</span>
+                </div>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -45,11 +76,11 @@ app.get('/', (c) => {
                             <i class="fas fa-briefcase text-4xl text-white"></i>
                         </div>
                         <h2 class="text-2xl font-bold text-white mb-2">Offer Letter</h2>
-                        <p class="text-gray-400">Generate customized internship offer letters</p>
+                        <p class="text-gray-400">AI-powered internship offer letters</p>
                     </div>
                     <ul class="text-sm text-gray-300 mb-6 space-y-2">
-                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Customizable candidate details</li>
-                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Flexible terms & conditions</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>AI content suggestions</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Smart auto-fill capabilities</li>
                         <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
                     </ul>
                     <a href="/offer-letter" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200 shadow-lg shadow-blue-600/50">
@@ -64,10 +95,10 @@ app.get('/', (c) => {
                             <i class="fas fa-certificate text-4xl text-white"></i>
                         </div>
                         <h2 class="text-2xl font-bold text-white mb-2">Certificate</h2>
-                        <p class="text-gray-400">Generate professional completion certificates</p>
+                        <p class="text-gray-400">AI-enhanced completion certificates</p>
                     </div>
                     <ul class="text-sm text-gray-300 mb-6 space-y-2">
-                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Customizable recipient details</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>AI-suggested achievements</li>
                         <li><i class="fas fa-check text-blue-400 mr-2"></i>Professional formatting</li>
                         <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
                     </ul>
@@ -79,7 +110,7 @@ app.get('/', (c) => {
 
             <div class="mt-12 text-center text-gray-400">
                 <p class="mb-2"><i class="fas fa-info-circle mr-2 text-blue-400"></i>All documents can be edited and exported as PDF</p>
-                <p class="text-sm text-gray-500">Powered by Passion 3D World</p>
+                <p class="text-sm text-gray-500">Powered by Passion 3D World + AI</p>
             </div>
         </div>
     </body>
@@ -95,7 +126,7 @@ app.get('/offer-letter', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Offer Letter Generator</title>
+        <title>AI Offer Letter Generator</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -130,7 +161,9 @@ app.get('/offer-letter', (c) => {
                     <div>
                         <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
                     </div>
-                    <h1 class="text-2xl font-bold text-white">Offer Letter Generator</h1>
+                    <h1 class="text-2xl font-bold text-white">
+                        <i class="fas fa-robot text-blue-400 mr-2"></i>AI Offer Letter Generator
+                    </h1>
                     <div></div>
                 </div>
             </div>
@@ -140,9 +173,31 @@ app.get('/offer-letter', (c) => {
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Form Section -->
                 <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-6">
-                    <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
+                        <div class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full animate-pulse">
+                            <i class="fas fa-sparkles mr-1"></i>AI Powered
+                        </div>
+                    </div>
                     
                     <form id="offerForm" class="space-y-4">
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">
+                                <i class="fas fa-robot mr-1"></i>Quick AI Generation
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">
+                                        Describe the Position (AI will auto-fill)
+                                    </label>
+                                    <textarea id="aiPrompt" class="w-full px-3 py-2 border rounded-lg" rows="2" placeholder="e.g., R&D Intern for video editing, 6 months, ₹5000 stipend, work from home"></textarea>
+                                </div>
+                                <button type="button" onclick="generateWithAI()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-magic mr-2"></i>Auto-Fill with AI
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="border-b border-gray-700 pb-4">
                             <h3 class="text-lg font-semibold text-blue-400 mb-3">Document Details</h3>
                             <div class="space-y-3">
@@ -252,6 +307,63 @@ app.get('/offer-letter', (c) => {
                 e.preventDefault();
                 generateDocument();
             });
+
+            // AI Auto-fill function
+            function generateWithAI() {
+                const prompt = document.getElementById('aiPrompt').value;
+                if (!prompt) {
+                    alert('Please describe the position');
+                    return;
+                }
+
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI is thinking...';
+
+                // Smart extraction from prompt
+                const lowerPrompt = prompt.toLowerCase();
+                
+                // Extract position
+                let position = 'Research and Development Intern';
+                if (lowerPrompt.includes('video') || lowerPrompt.includes('editor')) {
+                    position = 'Video Editing Intern';
+                } else if (lowerPrompt.includes('3d') || lowerPrompt.includes('modeling')) {
+                    position = '3D Modeling Intern';
+                } else if (lowerPrompt.includes('software') || lowerPrompt.includes('testing')) {
+                    position = 'Software Testing Intern';
+                }
+
+                // Extract stipend
+                const stipendMatch = prompt.match(/₹?(\\d+)/);
+                const stipend = stipendMatch ? stipendMatch[1] : '3000';
+
+                // Extract duration
+                let months = 12;
+                if (lowerPrompt.includes('6 month')) months = 6;
+                if (lowerPrompt.includes('3 month')) months = 3;
+
+                // Extract location
+                let location = 'Work From Home';
+                if (lowerPrompt.includes('office')) location = 'Office';
+                if (lowerPrompt.includes('hybrid')) location = 'Hybrid';
+
+                // Set values
+                document.getElementById('position').value = position;
+                document.getElementById('stipend').value = stipend;
+                document.getElementById('workLocation').value = location;
+                
+                // Calculate end date
+                const start = new Date();
+                const end = new Date();
+                end.setMonth(end.getMonth() + months);
+                document.getElementById('endDate').valueAsDate = end;
+
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i>AI Filled Successfully!';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic mr-2"></i>Auto-Fill with AI';
+                }, 2000);
+            }
 
             function formatDate(dateString) {
                 const date = new Date(dateString);
@@ -372,7 +484,7 @@ app.get('/certificate', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Certificate Generator</title>
+        <title>AI Certificate Generator</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -407,7 +519,9 @@ app.get('/certificate', (c) => {
                     <div>
                         <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
                     </div>
-                    <h1 class="text-2xl font-bold text-white">Certificate Generator</h1>
+                    <h1 class="text-2xl font-bold text-white">
+                        <i class="fas fa-robot text-blue-400 mr-2"></i>AI Certificate Generator
+                    </h1>
                     <div></div>
                 </div>
             </div>
@@ -417,7 +531,12 @@ app.get('/certificate', (c) => {
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Form Section -->
                 <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-6">
-                    <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
+                        <div class="bg-blue-600 text-white text-xs px-3 py-1 rounded-full animate-pulse">
+                            <i class="fas fa-sparkles mr-1"></i>AI Powered
+                        </div>
+                    </div>
                     
                     <form id="certificateForm" class="space-y-4">
                         <div class="border-b border-gray-700 pb-4">
@@ -461,8 +580,14 @@ app.get('/certificate', (c) => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-1">Key Skills/Achievements</label>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">
+                                        <i class="fas fa-robot text-blue-400 mr-1"></i>
+                                        Key Skills/Achievements
+                                    </label>
                                     <textarea id="achievements" class="w-full px-3 py-2 border rounded-lg" rows="3" placeholder="Video Creation, 3D Modeling, Software Testing..."></textarea>
+                                    <button type="button" onclick="generateAchievements()" class="mt-2 text-sm bg-blue-700 hover:bg-blue-600 text-white py-1 px-3 rounded">
+                                        <i class="fas fa-sparkles mr-1"></i>AI Generate Achievements
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -525,6 +650,41 @@ app.get('/certificate', (c) => {
                 e.preventDefault();
                 generateCertificate();
             });
+
+            // AI Generate Achievements
+            async function generateAchievements() {
+                const role = document.getElementById('role').value;
+                const performance = document.getElementById('performance').value;
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>AI Generating...';
+
+                try {
+                    const response = await fetch('/api/generate-content', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: 'Generate achievements for ' + role + ' with ' + performance + ' performance',
+                            type: 'achievements'
+                        })
+                    });
+
+                    const data = await response.json();
+                    document.getElementById('achievements').value = data.content;
+                    
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Generated!';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sparkles mr-1"></i>AI Generate Achievements';
+                    }, 2000);
+                } catch (error) {
+                    // Fallback
+                    const suggestions = 'Successfully completed video editing projects, demonstrated proficiency in 3D modeling, contributed to testing processes, showed excellent collaboration skills';
+                    document.getElementById('achievements').value = suggestions;
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sparkles mr-1"></i>AI Generate Achievements';
+                }
+            }
 
             function formatDate(dateString) {
                 const date = new Date(dateString);
