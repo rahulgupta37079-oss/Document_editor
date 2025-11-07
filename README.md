@@ -19,7 +19,16 @@
 
 ## Currently Completed Features
 
+### 🤖 AI-Powered Features
+- **Smart Auto-Fill**: Describe the position in natural language and AI extracts key details
+- **Intelligent Content Generation**: AI-powered suggestions for responsibilities and achievements
+- **Natural Language Processing**: Understands descriptions like "R&D Intern for video editing, 6 months, ₹5000, WFH"
+- **Demo Mode**: Works without API keys using smart pattern matching
+- **Real-time Generation**: Instant AI-powered content suggestions
+
 ### ✅ Offer Letter Generator
+- **AI Auto-Fill**: Describe position and AI fills the entire form automatically
+- **Smart Extraction**: AI extracts position, stipend, duration, location from text
 - Customizable candidate information (name, position)
 - Flexible date selection (document date, start date, end date)
 - Probation period configuration
@@ -32,6 +41,8 @@
 - Print support
 
 ### ✅ Certificate Generator
+- **AI-Generated Achievements**: One-click AI generation of professional achievements
+- **Performance-Based Content**: AI adapts content based on performance rating
 - Recipient information customization
 - Role/position specification
 - Period details (start and end dates)
@@ -45,11 +56,14 @@
 - Print support
 
 ### ✅ Technical Features
+- **AI-Powered Backend**: API endpoint for content generation
+- **Smart NLP Processing**: Natural language understanding for form auto-fill
+- **Demo Mode**: Works without external API keys
 - Built with Hono framework for lightweight performance
 - Responsive design using TailwindCSS
 - FontAwesome icons for enhanced UI
 - html2pdf.js integration for PDF generation
-- Clean, modern interface
+- Clean, modern dark theme interface
 - Mobile-friendly responsive design
 
 ## Features Not Yet Implemented
@@ -63,6 +77,8 @@
 - ❌ Custom branding/logo upload
 - ❌ Advanced template customization editor
 - ❌ Document versioning
+- ❌ External LLM API integration (currently in demo mode)
+- ❌ AI training on company-specific documents
 
 ## Recommended Next Steps for Development
 
@@ -129,9 +145,18 @@
 
 ## User Guide
 
-### Creating an Offer Letter
+### Creating an Offer Letter (with AI)
 1. Navigate to the home page and click "Create Offer Letter"
-2. Fill in the form with:
+
+**Option A: Use AI Auto-Fill (Recommended)**
+1. In the "Quick AI Generation" section, describe the position in natural language
+   - Example: "R&D Intern for video editing and 3D modeling, 6 months, ₹5000 stipend, work from home"
+2. Click "Auto-Fill with AI" and watch the AI fill the form automatically
+3. Review and adjust the generated values if needed
+4. Click "Generate Preview"
+
+**Option B: Manual Fill**
+2. Fill in the form manually with:
    - Document date
    - Candidate's full name
    - Position/role
@@ -144,14 +169,15 @@
 4. Review the generated offer letter in the preview pane
 5. Click "Download PDF" to export as PDF or "Print" to print directly
 
-### Creating a Certificate
+### Creating a Certificate (with AI)
 1. Navigate to the home page and click "Create Certificate"
 2. Fill in the form with:
    - Recipient's full name
    - Role/position during internship
    - Start and end dates of the period
    - Performance rating (Excellent, Very Good, Good, Satisfactory)
-   - Key skills and achievements (optional)
+   - Key skills and achievements
+     - **AI Tip**: Click "AI Generate Achievements" for professional AI-generated content!
    - Certificate ID
    - Issue date
 3. Click "Generate Preview" to see the certificate
@@ -159,11 +185,14 @@
 5. Click "Download PDF" to export as PDF or "Print" to print directly
 
 ### Tips
+- **Use AI for faster document creation**: The AI can understand natural language descriptions
+- **AI works in demo mode**: No API keys needed, uses smart pattern matching
 - All dates can be selected using the date picker
 - The preview updates when you click "Generate Preview"
 - PDF downloads are automatically named with the candidate/recipient name
 - Certificates are generated in landscape orientation for better presentation
 - Offer letters are in portrait orientation following standard document format
+- AI-generated content can be edited before generating the final document
 
 ## Deployment
 - **Platform**: Cloudflare Pages (ready for deployment)
@@ -224,6 +253,7 @@ webapp/
 ```
 
 ## Technologies Used
+- **AI Integration**: Smart NLP-based content generation (demo mode, extendable to real LLMs)
 - **Backend Framework**: Hono - Lightweight web framework for edge computing
 - **Frontend Styling**: TailwindCSS (CDN) with custom dark blue, white, and black theme
 - **Icons**: FontAwesome (v6.4.0)
@@ -232,6 +262,7 @@ webapp/
 - **Deployment**: Cloudflare Pages
 - **Process Manager**: PM2 (for development)
 - **Design Theme**: Dark mode with navy blue gradients, white text, and black accents
+- **AI API**: RESTful endpoint for content generation (`/api/generate-content`)
 
 ## License
 Proprietary - Passion 3D World
