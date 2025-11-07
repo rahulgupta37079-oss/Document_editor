@@ -1,15 +1,131 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
-const app = new Hono()
+type Bindings = {
+  GROQ_API_KEY?: string;
+  OPENAI_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
 
 // Enable CORS for API routes
 app.use('/api/*', cors())
 
-// API endpoint for AI content generation (demo mode - returns smart suggestions)
+// Smart Templates
+const templates = {
+  'video-editor': {
+    name: 'Video Editor Intern',
+    position: 'Video Editing Intern',
+    responsibilities: 'Video Editing and Post-Production, Motion Graphics Design, Color Grading, Audio Mixing, Content Creation for Social Media',
+    stipend: 5000,
+    workLocation: 'Hybrid'
+  },
+  '3d-artist': {
+    name: '3D Artist Intern',
+    position: '3D Modeling and Animation Intern',
+    responsibilities: '3D Modeling, Texturing and UV Mapping, Character Animation, Rendering and Lighting, Asset Creation for Games/Films',
+    stipend: 6000,
+    workLocation: 'Office'
+  },
+  'software-tester': {
+    name: 'Software Tester Intern',
+    position: 'Software Testing Intern',
+    responsibilities: 'Manual and Automated Testing, Bug Reporting and Tracking, Test Case Design, API Testing, Performance Testing',
+    stipend: 4000,
+    workLocation: 'Work From Home'
+  },
+  'content-creator': {
+    name: 'Content Creator Intern',
+    position: 'Content Development Intern',
+    responsibilities: 'Content Writing and Copywriting, Social Media Content Creation, SEO Optimization, Graphic Design, Video Script Writing',
+    stipend: 4500,
+    workLocation: 'Work From Home'
+  },
+  'rnd-generalist': {
+    name: 'R&D Generalist',
+    position: 'Research and Development Intern',
+    responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Documentation, Research and Innovation',
+    stipend: 5500,
+    workLocation: 'Hybrid'
+  }
+}
+
+// API endpoint to get templates
+app.get('/api/templates', (c) => {
+  return c.json({ templates })
+})
+
+// Enhanced AI content generation with real LLM support
 app.post('/api/generate-content', async (c) => {
   try {
-    const { prompt, type } = await c.req.json()
+    const { prompt, type, useRealAI } = await c.req.json()
+    
+    // Try real AI if API keys are available and useRealAI is true
+    if (useRealAI) {
+      const groqKey = c.env.GROQ_API_KEY
+      const openaiKey = c.env.OPENAI_API_KEY
+      
+      // Try Groq first (fastest and free)
+      if (groqKey) {
+        try {
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + groqKey
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-8b-instant',
+              messages: [{
+                role: 'user',
+                content: prompt
+              }],
+              temperature: 0.7,
+              max_tokens: 500
+            })
+          })
+
+          if (response.ok) {
+            const data = await response.json() as any
+            const content = data.choices?.[0]?.message?.content || 'Unable to generate content'
+            return c.json({ content, demo: false, provider: 'groq' })
+          }
+        } catch (error) {
+          console.log('Groq API failed, trying fallback')
+        }
+      }
+      
+      // Try OpenAI as fallback
+      if (openaiKey) {
+        try {
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + openaiKey
+            },
+            body: JSON.stringify({
+              model: 'gpt-3.5-turbo',
+              messages: [{
+                role: 'user',
+                content: prompt
+              }],
+              temperature: 0.7,
+              max_tokens: 500
+            })
+          })
+
+          if (response.ok) {
+            const data = await response.json() as any
+            const content = data.choices?.[0]?.message?.content || 'Unable to generate content'
+            return c.json({ content, demo: false, provider: 'openai' })
+          }
+        } catch (error) {
+          console.log('OpenAI API failed, using demo mode')
+        }
+      }
+    }
     
     // Demo mode - provide smart suggestions
     const demoResponses: Record<string, any> = {
@@ -26,7 +142,8 @@ app.post('/api/generate-content', async (c) => {
     
     return c.json({ 
       content: demoResponses[type]?.content || 'Generated content based on your input',
-      demo: true 
+      demo: true,
+      provider: 'demo'
     })
   } catch (error) {
     return c.json({ error: 'Failed to generate content', demo: true }, 500)
@@ -183,6 +300,27 @@ app.get('/offer-letter', (c) => {
                     <form id="offerForm" class="space-y-4">
                         <div class="border-b border-gray-700 pb-4">
                             <h3 class="text-lg font-semibold text-blue-400 mb-3">
+                                <i class="fas fa-layer-group mr-1"></i>Smart Templates
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">
+                                        Choose a Pre-built Template
+                                    </label>
+                                    <select id="templateSelector" onchange="applyTemplate()" class="w-full px-3 py-2 border rounded-lg">
+                                        <option value="">-- Select Template --</option>
+                                        <option value="video-editor">Video Editor Intern</option>
+                                        <option value="3d-artist">3D Artist Intern</option>
+                                        <option value="software-tester">Software Tester Intern</option>
+                                        <option value="content-creator">Content Creator Intern</option>
+                                        <option value="rnd-generalist">R&D Generalist</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">
                                 <i class="fas fa-robot mr-1"></i>Quick AI Generation
                             </h3>
                             <div class="space-y-3">
@@ -192,9 +330,18 @@ app.get('/offer-letter', (c) => {
                                     </label>
                                     <textarea id="aiPrompt" class="w-full px-3 py-2 border rounded-lg" rows="2" placeholder="e.g., R&D Intern for video editing, 6 months, ₹5000 stipend, work from home"></textarea>
                                 </div>
-                                <button type="button" onclick="generateWithAI()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
-                                    <i class="fas fa-magic mr-2"></i>Auto-Fill with AI
-                                </button>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" onclick="generateWithAI(false)" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-magic mr-2"></i>Smart Auto-Fill
+                                    </button>
+                                    <button type="button" onclick="generateWithAI(true)" class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-brain mr-2"></i>AI Pro Mode
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-400 text-center">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Smart: Fast pattern matching | Pro: Real AI (requires API key)
+                                </p>
                             </div>
                         </div>
                         
@@ -308,8 +455,64 @@ app.get('/offer-letter', (c) => {
                 generateDocument();
             });
 
-            // AI Auto-fill function
-            function generateWithAI() {
+            // Template data
+            const templates = {
+                'video-editor': {
+                    position: 'Video Editing Intern',
+                    responsibilities: 'Video Editing and Post-Production, Motion Graphics Design, Color Grading, Audio Mixing, Content Creation for Social Media',
+                    stipend: 5000,
+                    workLocation: 'Hybrid'
+                },
+                '3d-artist': {
+                    position: '3D Modeling and Animation Intern',
+                    responsibilities: '3D Modeling, Texturing and UV Mapping, Character Animation, Rendering and Lighting, Asset Creation',
+                    stipend: 6000,
+                    workLocation: 'Office'
+                },
+                'software-tester': {
+                    position: 'Software Testing Intern',
+                    responsibilities: 'Manual and Automated Testing, Bug Reporting, Test Case Design, API Testing, Performance Testing',
+                    stipend: 4000,
+                    workLocation: 'Work From Home'
+                },
+                'content-creator': {
+                    position: 'Content Development Intern',
+                    responsibilities: 'Content Writing, Social Media Management, SEO Optimization, Graphic Design, Video Scripts',
+                    stipend: 4500,
+                    workLocation: 'Work From Home'
+                },
+                'rnd-generalist': {
+                    position: 'Research and Development Intern',
+                    responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Research and Innovation',
+                    stipend: 5500,
+                    workLocation: 'Hybrid'
+                }
+            };
+
+            // Apply template
+            function applyTemplate() {
+                const selector = document.getElementById('templateSelector');
+                const templateKey = selector.value;
+                
+                if (!templateKey) return;
+                
+                const template = templates[templateKey];
+                if (template) {
+                    document.getElementById('position').value = template.position;
+                    document.getElementById('stipend').value = template.stipend;
+                    document.getElementById('workLocation').value = template.workLocation;
+                    
+                    // Show success message
+                    const originalText = selector.options[selector.selectedIndex].text;
+                    selector.style.borderColor = '#10b981';
+                    setTimeout(() => {
+                        selector.style.borderColor = '';
+                    }, 1000);
+                }
+            }
+
+            // Enhanced AI Auto-fill function
+            async function generateWithAI(useRealAI = false) {
                 const prompt = document.getElementById('aiPrompt').value;
                 if (!prompt) {
                     alert('Please describe the position');
@@ -317,52 +520,90 @@ app.get('/offer-letter', (c) => {
                 }
 
                 const btn = event.target;
+                const originalHTML = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI is thinking...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + (useRealAI ? 'AI Pro thinking...' : 'Processing...');
 
-                // Smart extraction from prompt
-                const lowerPrompt = prompt.toLowerCase();
-                
-                // Extract position
-                let position = 'Research and Development Intern';
-                if (lowerPrompt.includes('video') || lowerPrompt.includes('editor')) {
-                    position = 'Video Editing Intern';
-                } else if (lowerPrompt.includes('3d') || lowerPrompt.includes('modeling')) {
-                    position = '3D Modeling Intern';
-                } else if (lowerPrompt.includes('software') || lowerPrompt.includes('testing')) {
-                    position = 'Software Testing Intern';
-                }
+                try {
+                    if (useRealAI) {
+                        // Try real AI API
+                        const response = await fetch('/api/generate-content', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                prompt: 'Extract job details from: ' + prompt + '. Return JSON with position, stipend, duration_months, location, responsibilities',
+                                type: 'auto-fill',
+                                useRealAI: true
+                            })
+                        });
 
-                // Extract stipend
-                const stipendMatch = prompt.match(/₹?(\\d+)/);
-                const stipend = stipendMatch ? stipendMatch[1] : '3000';
+                        const data = await response.json();
+                        
+                        if (!data.demo) {
+                            // Real AI response - try to parse JSON
+                            try {
+                                const parsed = JSON.parse(data.content);
+                                if (parsed.position) document.getElementById('position').value = parsed.position;
+                                if (parsed.stipend) document.getElementById('stipend').value = parsed.stipend;
+                                if (parsed.location) document.getElementById('workLocation').value = parsed.location;
+                                
+                                btn.innerHTML = '<i class="fas fa-check mr-2"></i>AI Pro Success!';
+                                setTimeout(() => {
+                                    btn.disabled = false;
+                                    btn.innerHTML = originalHTML;
+                                }, 2000);
+                                return;
+                            } catch (e) {
+                                // AI didn't return JSON, fallback to smart mode
+                                console.log('AI response not JSON, using smart mode');
+                            }
+                        }
+                    }
+                    
+                    // Smart extraction mode (always works)
+                    const lowerPrompt = prompt.toLowerCase();
+                    
+                    let position = 'Research and Development Intern';
+                    if (lowerPrompt.includes('video') || lowerPrompt.includes('editor')) {
+                        position = 'Video Editing Intern';
+                    } else if (lowerPrompt.includes('3d') || lowerPrompt.includes('modeling')) {
+                        position = '3D Modeling Intern';
+                    } else if (lowerPrompt.includes('software') || lowerPrompt.includes('testing')) {
+                        position = 'Software Testing Intern';
+                    } else if (lowerPrompt.includes('content')) {
+                        position = 'Content Development Intern';
+                    }
 
-                // Extract duration
-                let months = 12;
-                if (lowerPrompt.includes('6 month')) months = 6;
-                if (lowerPrompt.includes('3 month')) months = 3;
+                    const stipendMatch = prompt.match(/₹?(\\d+)/);
+                    const stipend = stipendMatch ? stipendMatch[1] : '3000';
 
-                // Extract location
-                let location = 'Work From Home';
-                if (lowerPrompt.includes('office')) location = 'Office';
-                if (lowerPrompt.includes('hybrid')) location = 'Hybrid';
+                    let months = 12;
+                    if (lowerPrompt.includes('6 month')) months = 6;
+                    if (lowerPrompt.includes('3 month')) months = 3;
 
-                // Set values
-                document.getElementById('position').value = position;
-                document.getElementById('stipend').value = stipend;
-                document.getElementById('workLocation').value = location;
-                
-                // Calculate end date
-                const start = new Date();
-                const end = new Date();
-                end.setMonth(end.getMonth() + months);
-                document.getElementById('endDate').valueAsDate = end;
+                    let location = 'Work From Home';
+                    if (lowerPrompt.includes('office')) location = 'Office';
+                    if (lowerPrompt.includes('hybrid')) location = 'Hybrid';
 
-                btn.innerHTML = '<i class="fas fa-check mr-2"></i>AI Filled Successfully!';
-                setTimeout(() => {
+                    document.getElementById('position').value = position;
+                    document.getElementById('stipend').value = stipend;
+                    document.getElementById('workLocation').value = location;
+                    
+                    const start = new Date();
+                    const end = new Date();
+                    end.setMonth(end.getMonth() + months);
+                    document.getElementById('endDate').valueAsDate = end;
+
+                    btn.innerHTML = '<i class="fas fa-check mr-2"></i>Filled Successfully!';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                } catch (error) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-magic mr-2"></i>Auto-Fill with AI';
-                }, 2000);
+                    btn.innerHTML = originalHTML;
+                    alert('Generation failed. Please try manual entry.');
+                }
             }
 
             function formatDate(dateString) {
@@ -585,9 +826,14 @@ app.get('/certificate', (c) => {
                                         Key Skills/Achievements
                                     </label>
                                     <textarea id="achievements" class="w-full px-3 py-2 border rounded-lg" rows="3" placeholder="Video Creation, 3D Modeling, Software Testing..."></textarea>
-                                    <button type="button" onclick="generateAchievements()" class="mt-2 text-sm bg-blue-700 hover:bg-blue-600 text-white py-1 px-3 rounded">
-                                        <i class="fas fa-sparkles mr-1"></i>AI Generate Achievements
-                                    </button>
+                                    <div class="mt-2 grid grid-cols-2 gap-2">
+                                        <button type="button" onclick="generateAchievements(false)" class="text-sm bg-blue-700 hover:bg-blue-600 text-white py-1 px-3 rounded">
+                                            <i class="fas fa-sparkles mr-1"></i>Smart Generate
+                                        </button>
+                                        <button type="button" onclick="generateAchievements(true)" class="text-sm bg-green-700 hover:bg-green-600 text-white py-1 px-3 rounded">
+                                            <i class="fas fa-brain mr-1"></i>AI Pro
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -651,38 +897,40 @@ app.get('/certificate', (c) => {
                 generateCertificate();
             });
 
-            // AI Generate Achievements
-            async function generateAchievements() {
+            // Enhanced AI Generate Achievements
+            async function generateAchievements(useRealAI = false) {
                 const role = document.getElementById('role').value;
                 const performance = document.getElementById('performance').value;
                 const btn = event.target;
+                const originalHTML = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>AI Generating...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>' + (useRealAI ? 'AI Pro...' : 'Generating...');
 
                 try {
                     const response = await fetch('/api/generate-content', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            prompt: 'Generate achievements for ' + role + ' with ' + performance + ' performance',
-                            type: 'achievements'
+                            prompt: 'Write 5 professional achievements for a ' + role + ' with ' + performance + ' performance rating at Passion 3D World. Focus on video editing, 3D modeling, and software testing skills. Be specific and impressive.',
+                            type: 'achievements',
+                            useRealAI: useRealAI
                         })
                     });
 
                     const data = await response.json();
                     document.getElementById('achievements').value = data.content;
                     
-                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Generated!';
+                    const successMsg = data.demo ? 'Generated!' : 'AI Pro Success!';
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>' + successMsg;
                     setTimeout(() => {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-sparkles mr-1"></i>AI Generate Achievements';
+                        btn.innerHTML = originalHTML;
                     }, 2000);
                 } catch (error) {
-                    // Fallback
                     const suggestions = 'Successfully completed video editing projects, demonstrated proficiency in 3D modeling, contributed to testing processes, showed excellent collaboration skills';
                     document.getElementById('achievements').value = suggestions;
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-sparkles mr-1"></i>AI Generate Achievements';
+                    btn.innerHTML = originalHTML;
                 }
             }
 
