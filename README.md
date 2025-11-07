@@ -12,14 +12,23 @@
   - Print support
 
 ## URLs
+- **🌐 Production**: https://passion3d-docs.pages.dev (Cloudflare Pages)
+- **📦 Branch Deployments**: https://ebb90f45.passion3d-docs.pages.dev
 - **Development**: https://3000-i8k1j0dusjnrkrmd40c5e-2e1b9533.sandbox.novita.ai
 - **Home**: `/` - Main landing page with navigation
 - **Offer Letter Generator**: `/offer-letter` - Create customized internship offer letters
 - **Certificate Generator**: `/certificate` - Create professional completion certificates
+- **Templates API**: `/api/templates` - Get all pre-built templates
+- **AI Generate API**: `/api/generate-content` - AI-powered content generation
 
 ## Currently Completed Features
 
 ### 🤖 AI-Powered Features
+- **Smart Templates**: 5 pre-built templates (Video Editor, 3D Artist, Software Tester, Content Creator, R&D Generalist)
+- **One-Click Template Application**: Instantly fill forms with professional pre-configured values
+- **Dual AI Modes**: 
+  - **Smart Mode**: Fast pattern matching (always available)
+  - **AI Pro Mode**: Real LLM integration (Groq/OpenAI - requires API key)
 - **Smart Auto-Fill**: Describe the position in natural language and AI extracts key details
 - **Intelligent Content Generation**: AI-powered suggestions for responsibilities and achievements
 - **Natural Language Processing**: Understands descriptions like "R&D Intern for video editing, 6 months, ₹5000, WFH"
@@ -67,18 +76,17 @@
 - Mobile-friendly responsive design
 
 ## Features Not Yet Implemented
-- ❌ Database storage for generated documents
-- ❌ Template management system for multiple document types
+- ❌ Database storage for generated documents (can be added with Cloudflare D1)
 - ❌ User authentication and access control
 - ❌ Document history and tracking
 - ❌ Email delivery of generated documents
 - ❌ Digital signature integration
-- ❌ Bulk document generation
+- ❌ Bulk document generation (CSV import)
 - ❌ Custom branding/logo upload
-- ❌ Advanced template customization editor
+- ❌ Advanced template customization editor (currently 5 pre-built templates)
 - ❌ Document versioning
-- ❌ External LLM API integration (currently in demo mode)
 - ❌ AI training on company-specific documents
+- ❌ Multi-language support
 
 ## Recommended Next Steps for Development
 
@@ -145,15 +153,29 @@
 
 ## User Guide
 
-### Creating an Offer Letter (with AI)
+### Creating an Offer Letter (with AI & Templates)
 1. Navigate to the home page and click "Create Offer Letter"
 
-**Option A: Use AI Auto-Fill (Recommended)**
+**Option A: Use Smart Templates (Fastest)**
+1. In the "Smart Templates" section, select a pre-built template:
+   - Video Editor Intern (₹5000, Hybrid)
+   - 3D Artist Intern (₹6000, Office)
+   - Software Tester Intern (₹4000, WFH)
+   - Content Creator Intern (₹4500, WFH)
+   - R&D Generalist (₹5500, Hybrid)
+2. Template auto-fills position, stipend, and work location
+3. Add candidate name and adjust dates
+4. Click "Generate Preview"
+
+**Option B: Use AI Auto-Fill (Flexible)**
 1. In the "Quick AI Generation" section, describe the position in natural language
    - Example: "R&D Intern for video editing and 3D modeling, 6 months, ₹5000 stipend, work from home"
-2. Click "Auto-Fill with AI" and watch the AI fill the form automatically
-3. Review and adjust the generated values if needed
-4. Click "Generate Preview"
+2. Choose your AI mode:
+   - **"Smart Auto-Fill"**: Fast pattern matching (no API key needed)
+   - **"AI Pro Mode"**: Real LLM generation (requires Groq/OpenAI API key)
+3. Click the button and watch the AI fill the form automatically
+4. Review and adjust the generated values if needed
+5. Click "Generate Preview"
 
 **Option B: Manual Fill**
 2. Fill in the form manually with:
@@ -195,15 +217,19 @@
 - AI-generated content can be edited before generating the final document
 
 ## Deployment
-- **Platform**: Cloudflare Pages (ready for deployment)
-- **Status**: ✅ Active (Development)
+- **Platform**: Cloudflare Pages ✅ **DEPLOYED**
+- **Status**: 🌐 Live in Production
+- **Production URL**: https://passion3d-docs.pages.dev
+- **Project Name**: passion3d-docs
 - **Tech Stack**: 
   - Backend: Hono Framework (v4.10.4)
   - Frontend: TailwindCSS + FontAwesome + html2pdf.js
-  - Runtime: Cloudflare Workers
+  - Runtime: Cloudflare Workers (Edge Computing)
   - Build Tool: Vite (v6.3.5)
   - Package Manager: npm
+  - AI Support: Groq API (Llama 3.1), OpenAI API (optional)
 - **Last Updated**: 2025-11-07
+- **Deployment Date**: 2025-11-07
 
 ## Development Commands
 
@@ -234,7 +260,38 @@ npm run clean-port
 
 # Deploy to Cloudflare Pages (production)
 npm run deploy:prod
+
+# Or deploy manually
+npx wrangler pages deploy dist --project-name passion3d-docs
 ```
+
+## Setting Up AI Pro Mode (Optional)
+
+To enable AI Pro Mode with real LLM integration:
+
+### Option 1: Groq API (Recommended - Free & Fast)
+1. Get a free API key from https://console.groq.com
+2. In Cloudflare Pages dashboard, add secret:
+   ```bash
+   npx wrangler pages secret put GROQ_API_KEY --project-name passion3d-docs
+   ```
+3. Enter your API key when prompted
+
+### Option 2: OpenAI API
+1. Get API key from https://platform.openai.com
+2. Add secret:
+   ```bash
+   npx wrangler pages secret put OPENAI_API_KEY --project-name passion3d-docs
+   ```
+
+### For Local Development
+Create `.dev.vars` file in project root:
+```
+GROQ_API_KEY=your-api-key-here
+OPENAI_API_KEY=your-openai-key-here
+```
+
+**Note**: Smart Mode works perfectly without any API keys!
 
 ## Project Structure
 ```
