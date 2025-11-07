@@ -13,9 +13,9 @@ const app = new Hono<{ Bindings: Bindings }>()
 // Enable CORS for API routes
 app.use('/api/*', cors())
 
-// Smart Templates - Expanded Library (20 templates)
+// Smart Templates - Expanded Library
 const templates = {
-  // Creative Templates (7)
+  // Original 5 Templates
   'video-editor': {
     name: 'Video Editor Intern',
     category: 'Creative',
@@ -32,37 +32,13 @@ const templates = {
     stipend: 6000,
     workLocation: 'Office'
   },
-  'graphic-designer': {
-    name: 'Graphic Designer',
-    category: 'Creative',
-    position: 'Graphic Design Intern',
-    responsibilities: 'Visual Design, Brand Identity, Adobe Creative Suite, Social Media Graphics, Print Design, Illustration',
-    stipend: 4500,
-    workLocation: 'Hybrid'
-  },
-  'ui-ux-designer': {
-    name: 'UI/UX Designer',
-    category: 'Creative',
-    position: 'UI/UX Design Intern',
-    responsibilities: 'User Research, Wireframing, Prototyping, Figma/Adobe XD, Usability Testing, Design Systems, User Flows',
-    stipend: 6000,
-    workLocation: 'Hybrid'
-  },
-  'animator': {
-    name: 'Animator',
-    category: 'Creative',
-    position: 'Animation Intern',
-    responsibilities: '2D/3D Animation, Character Animation, Motion Design, After Effects, Storyboarding, Visual Effects',
-    stipend: 5500,
-    workLocation: 'Office'
-  },
-  'photographer': {
-    name: 'Photographer',
-    category: 'Creative',
-    position: 'Photography Intern',
-    responsibilities: 'Product Photography, Event Coverage, Photo Editing, Lightroom/Photoshop, Studio Setup, Portfolio Management',
+  'software-tester': {
+    name: 'Software Tester Intern',
+    category: 'Technical',
+    position: 'Software Testing Intern',
+    responsibilities: 'Manual and Automated Testing, Bug Reporting and Tracking, Test Case Design, API Testing, Performance Testing',
     stipend: 4000,
-    workLocation: 'Hybrid'
+    workLocation: 'Work From Home'
   },
   'content-creator': {
     name: 'Content Creator Intern',
@@ -72,8 +48,16 @@ const templates = {
     stipend: 4500,
     workLocation: 'Work From Home'
   },
+  'rnd-generalist': {
+    name: 'R&D Generalist',
+    category: 'Technical',
+    position: 'Research and Development Intern',
+    responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Documentation, Research and Innovation',
+    stipend: 5500,
+    workLocation: 'Hybrid'
+  },
   
-  // Technical Templates (9)
+  // New Technical Templates
   'frontend-dev': {
     name: 'Frontend Developer',
     category: 'Technical',
@@ -130,24 +114,42 @@ const templates = {
     stipend: 9000,
     workLocation: 'Hybrid'
   },
-  'software-tester': {
-    name: 'Software Tester Intern',
-    category: 'Technical',
-    position: 'Software Testing Intern',
-    responsibilities: 'Manual and Automated Testing, Bug Reporting and Tracking, Test Case Design, API Testing, Performance Testing',
-    stipend: 4000,
-    workLocation: 'Work From Home'
+  
+  // New Creative Templates
+  'graphic-designer': {
+    name: 'Graphic Designer',
+    category: 'Creative',
+    position: 'Graphic Design Intern',
+    responsibilities: 'Visual Design, Brand Identity, Adobe Creative Suite, Social Media Graphics, Print Design, Illustration',
+    stipend: 4500,
+    workLocation: 'Hybrid'
   },
-  'rnd-generalist': {
-    name: 'R&D Generalist',
-    category: 'Technical',
-    position: 'Research and Development Intern',
-    responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Documentation, Research and Innovation',
+  'ui-ux-designer': {
+    name: 'UI/UX Designer',
+    category: 'Creative',
+    position: 'UI/UX Design Intern',
+    responsibilities: 'User Research, Wireframing, Prototyping, Figma/Adobe XD, Usability Testing, Design Systems, User Flows',
+    stipend: 6000,
+    workLocation: 'Hybrid'
+  },
+  'animator': {
+    name: 'Animator',
+    category: 'Creative',
+    position: 'Animation Intern',
+    responsibilities: '2D/3D Animation, Character Animation, Motion Design, After Effects, Storyboarding, Visual Effects',
     stipend: 5500,
+    workLocation: 'Office'
+  },
+  'photographer': {
+    name: 'Photographer',
+    category: 'Creative',
+    position: 'Photography Intern',
+    responsibilities: 'Product Photography, Event Coverage, Photo Editing, Lightroom/Photoshop, Studio Setup, Portfolio Management',
+    stipend: 4000,
     workLocation: 'Hybrid'
   },
   
-  // Business Templates (4)
+  // New Business Templates
   'digital-marketing': {
     name: 'Digital Marketing',
     category: 'Business',
@@ -182,20 +184,97 @@ const templates = {
   }
 }
 
+// Database API endpoints (requires D1 setup)
+// Save document
+app.post('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured', demo: true }, 503)
+    }
+    
+    const { type, candidateName, position, documentData } = await c.req.json()
+    
+    const result = await c.env.DB.prepare(
+      'INSERT INTO documents (type, candidate_name, position, document_data) VALUES (?, ?, ?, ?)'
+    ).bind(type, candidateName, position, JSON.stringify(documentData)).run()
+    
+    return c.json({ success: true, id: result.meta.last_row_id })
+  } catch (error) {
+    return c.json({ error: 'Failed to save document', demo: true }, 500)
+  }
+})
+
+// Get all documents
+app.get('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ documents: [], demo: true })
+    }
+    
+    const { results } = await c.env.DB.prepare(
+      'SELECT id, type, candidate_name, position, created_at FROM documents ORDER BY created_at DESC LIMIT 50'
+    ).all()
+    
+    return c.json({ documents: results })
+  } catch (error) {
+    return c.json({ documents: [], error: 'Failed to fetch documents' }, 500)
+  }
+})
+
+// Get single document
+app.get('/api/documents/:id', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const id = c.req.param('id')
+    const result = await c.env.DB.prepare(
+      'SELECT * FROM documents WHERE id = ?'
+    ).bind(id).first()
+    
+    if (!result) {
+      return c.json({ error: 'Document not found' }, 404)
+    }
+    
+    return c.json({ document: result })
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch document' }, 500)
+  }
+})
+
+// Delete document
+app.delete('/api/documents/:id', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const id = c.req.param('id')
+    await c.env.DB.prepare('DELETE FROM documents WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ error: 'Failed to delete document' }, 500)
+  }
+})
+
 // API endpoint to get templates
 app.get('/api/templates', (c) => {
   return c.json({ templates })
 })
 
-// AI content generation
+// Enhanced AI content generation with real LLM support
 app.post('/api/generate-content', async (c) => {
   try {
     const { prompt, type, useRealAI } = await c.req.json()
     
-    // Try real AI if API keys available
+    // Try real AI if API keys are available and useRealAI is true
     if (useRealAI) {
       const groqKey = c.env.GROQ_API_KEY
+      const openaiKey = c.env.OPENAI_API_KEY
       
+      // Try Groq first (fastest and free)
       if (groqKey) {
         try {
           const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -206,7 +285,10 @@ app.post('/api/generate-content', async (c) => {
             },
             body: JSON.stringify({
               model: 'llama-3.1-8b-instant',
-              messages: [{ role: 'user', content: prompt }],
+              messages: [{
+                role: 'user',
+                content: prompt
+              }],
               temperature: 0.7,
               max_tokens: 500
             })
@@ -214,726 +296,148 @@ app.post('/api/generate-content', async (c) => {
 
           if (response.ok) {
             const data = await response.json() as any
-            const content = data.choices?.[0]?.message?.content || 'Unable to generate'
+            const content = data.choices?.[0]?.message?.content || 'Unable to generate content'
             return c.json({ content, demo: false, provider: 'groq' })
           }
         } catch (error) {
-          // Fall through to demo mode
+          console.log('Groq API failed, trying fallback')
+        }
+      }
+      
+      // Try OpenAI as fallback
+      if (openaiKey) {
+        try {
+          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + openaiKey
+            },
+            body: JSON.stringify({
+              model: 'gpt-3.5-turbo',
+              messages: [{
+                role: 'user',
+                content: prompt
+              }],
+              temperature: 0.7,
+              max_tokens: 500
+            })
+          })
+
+          if (response.ok) {
+            const data = await response.json() as any
+            const content = data.choices?.[0]?.message?.content || 'Unable to generate content'
+            return c.json({ content, demo: false, provider: 'openai' })
+          }
+        } catch (error) {
+          console.log('OpenAI API failed, using demo mode')
         }
       }
     }
     
-    // Demo mode responses
+    // Demo mode - provide smart suggestions
     const demoResponses: Record<string, any> = {
-      'responsibilities': { content: "Video Creation and Editing, 3D Modeling and Animation, Content Development, Software Testing, Documentation, Team Collaboration" },
-      'achievements': { content: "Successfully completed multiple projects with high-quality output, demonstrated proficiency in required tools, contributed to team success, showed excellent communication skills, met all deadlines with attention to detail" }
+      'responsibilities': {
+        content: "Video Creation and Editing, 3D Modeling and Animation, Content Development, Software and Hardware Testing, Documentation and Reporting, Team Collaboration"
+      },
+      'achievements': {
+        content: "Successfully completed multiple video editing projects with high-quality output, demonstrated proficiency in 3D modeling software, contributed to software quality assurance testing, showed excellent teamwork and communication skills, met all project deadlines with attention to detail"
+      },
+      'terms': {
+        content: "The intern will work on assigned projects including video creation, content development, and software testing. All work products remain company property."
+      }
     }
     
     return c.json({ 
-      content: demoResponses[type]?.content || 'Generated content',
+      content: demoResponses[type]?.content || 'Generated content based on your input',
       demo: true,
       provider: 'demo'
     })
   } catch (error) {
-    return c.json({ error: 'Failed to generate', demo: true }, 500)
+    return c.json({ error: 'Failed to generate content', demo: true }, 500)
   }
 })
 
-// Homepage with navigation, hero, features, testimonials
+// Home page with navigation
 app.get('/', (c) => {
   return c.html(`
     <!DOCTYPE html>
-    <html lang="en" class="scroll-smooth">
+    <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Passion3D Docs - AI Document Generator</title>
+        <title>Document Generator - Passion 3D World</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
+            @media print {
+                .no-print { display: none !important; }
+                .print-content { margin: 0; padding: 20px; }
+            }
             body {
                 background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c1629 100%);
-                background-attachment: fixed;
             }
-            .nav-link:hover { color: #60a5fa !important; transform: translateY(-2px); transition: all 0.3s; }
-            .feature-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3); }
-            .testimonial-card { transition: all 0.3s ease; }
-            .testimonial-card:hover { transform: scale(1.05); }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-            .animate-fadeIn { animation: fadeIn 1s ease-out; }
         </style>
     </head>
-    <body class="text-white">
-        <!-- Navigation -->
-        <nav class="fixed top-0 w-full bg-gray-900/95 backdrop-blur-sm z-50 border-b border-blue-500/30">
-            <div class="container mx-auto px-4 py-4">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-file-alt text-blue-400 text-2xl"></i>
-                        <span class="text-2xl font-bold">Passion<span class="text-blue-400">3D</span> Docs</span>
-                    </div>
-                    <div class="hidden md:flex space-x-6">
-                        <a href="#home" class="nav-link text-gray-300">Home</a>
-                        <a href="#features" class="nav-link text-gray-300">Features</a>
-                        <a href="#templates" class="nav-link text-gray-300">Templates</a>
-                        <a href="#upload" class="nav-link text-gray-300">Upload & Edit</a>
-                        <a href="#testimonials" class="nav-link text-gray-300">Testimonials</a>
-                        <a href="#about" class="nav-link text-gray-300">About</a>
-                    </div>
-                    <div class="flex space-x-3">
-                        <a href="/offer-letter" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition">
-                            <i class="fas fa-file-contract mr-2"></i>Create Offer Letter
-                        </a>
-                        <button class="md:hidden text-2xl"><i class="fas fa-bars"></i></button>
-                    </div>
+    <body class="min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold text-white mb-4">
+                    <i class="fas fa-robot mr-3 text-blue-400"></i>
+                    AI Document Generator
+                </h1>
+                <p class="text-xl text-gray-300">Passion 3D World - AI-Powered Document Creation</p>
+                <div class="mt-4 inline-flex items-center bg-blue-900/30 border border-blue-500 rounded-lg px-4 py-2">
+                    <i class="fas fa-sparkles text-yellow-400 mr-2"></i>
+                    <span class="text-blue-300 text-sm">Powered by AI - Smart Content Generation</span>
                 </div>
             </div>
-        </nav>
 
-        <!-- Hero Section -->
-        <section id="home" class="pt-32 pb-20 animate-fadeIn">
-            <div class="container mx-auto px-4 text-center">
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="text-6xl font-bold mb-6 leading-tight">
-                        AI-Powered Document<br/>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                            Generation Platform
-                        </span>
-                    </h1>
-                    <p class="text-xl text-gray-300 mb-8 leading-relaxed">
-                        Create professional offer letters and certificates in seconds with AI assistance. 
-                        20+ pre-built templates, smart editing, and instant PDF generation.
-                    </p>
-                    <div class="flex justify-center space-x-4 mb-12">
-                        <a href="#upload" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-xl text-lg font-semibold shadow-lg hover:shadow-blue-500/50 transition-all">
-                            <i class="fas fa-upload mr-2"></i>Upload & Edit Document
-                        </a>
-                        <a href="/offer-letter" class="bg-gray-800 hover:bg-gray-700 px-8 py-4 rounded-xl text-lg font-semibold border border-blue-500/50 transition-all">
-                            <i class="fas fa-plus mr-2"></i>Create New
-                        </a>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Offer Letter Card -->
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-xl shadow-2xl p-8 hover:shadow-blue-500/50 transition-all duration-300 hover:border-blue-400">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                            <i class="fas fa-briefcase text-4xl text-white"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-white mb-2">Offer Letter</h2>
+                        <p class="text-gray-400">AI-powered internship offer letters</p>
                     </div>
-                    
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
-                        <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4">
-                            <div class="text-3xl font-bold text-blue-400">20+</div>
-                            <div class="text-sm text-gray-400">Templates</div>
+                    <ul class="text-sm text-gray-300 mb-6 space-y-2">
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>AI content suggestions</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Smart auto-fill capabilities</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
+                    </ul>
+                    <a href="/offer-letter" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200 shadow-lg shadow-blue-600/50">
+                        Create Offer Letter <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+
+                <!-- Certificate Card -->
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-xl shadow-2xl p-8 hover:shadow-blue-500/50 transition-all duration-300 hover:border-blue-400">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                            <i class="fas fa-certificate text-4xl text-white"></i>
                         </div>
-                        <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4">
-                            <div class="text-3xl font-bold text-purple-400">AI</div>
-                            <div class="text-sm text-gray-400">Powered</div>
-                        </div>
-                        <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4">
-                            <div class="text-3xl font-bold text-green-400">30s</div>
-                            <div class="text-sm text-gray-400">Generation</div>
-                        </div>
+                        <h2 class="text-2xl font-bold text-white mb-2">Certificate</h2>
+                        <p class="text-gray-400">AI-enhanced completion certificates</p>
                     </div>
+                    <ul class="text-sm text-gray-300 mb-6 space-y-2">
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>AI-suggested achievements</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Professional formatting</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
+                    </ul>
+                    <a href="/certificate" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200 shadow-lg shadow-blue-600/50">
+                        Create Certificate <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
                 </div>
             </div>
-        </section>
 
-        <!-- Features Section -->
-        <section id="features" class="py-20 bg-gray-900/30">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4">Powerful Features</h2>
-                    <p class="text-gray-400 text-lg">Everything you need to create professional documents</p>
-                </div>
-                
-                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <!-- Feature 1 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-blue-400">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">AI-Powered Generation</h3>
-                        <p class="text-gray-400">Smart AI understands your requirements and generates professional content instantly</p>
-                    </div>
-                    
-                    <!-- Feature 2 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-purple-400">
-                            <i class="fas fa-upload"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">Upload & Edit</h3>
-                        <p class="text-gray-400">Upload existing PDFs and let AI extract and modify content intelligently</p>
-                    </div>
-                    
-                    <!-- Feature 3 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-green-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-green-400">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">20+ Templates</h3>
-                        <p class="text-gray-400">Pre-built professional templates for Creative, Technical, and Business roles</p>
-                    </div>
-                    
-                    <!-- Feature 4 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-yellow-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-yellow-400">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">Lightning Fast</h3>
-                        <p class="text-gray-400">Generate complete documents in under 30 seconds with real-time preview</p>
-                    </div>
-                    
-                    <!-- Feature 5 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-red-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-red-400">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">PDF Export</h3>
-                        <p class="text-gray-400">One-click PDF export with professional formatting, ready to print or email</p>
-                    </div>
-                    
-                    <!-- Feature 6 -->
-                    <div class="feature-card bg-gradient-to-br from-gray-900 to-gray-800 border border-indigo-500/30 rounded-2xl p-8 transition-all">
-                        <div class="text-5xl mb-4 text-indigo-400">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-3">Mobile Friendly</h3>
-                        <p class="text-gray-400">Fully responsive design works perfectly on desktop, tablet, and mobile</p>
-                    </div>
-                </div>
+            <div class="mt-12 text-center text-gray-400">
+                <p class="mb-2"><i class="fas fa-info-circle mr-2 text-blue-400"></i>All documents can be edited and exported as PDF</p>
+                <p class="text-sm text-gray-500">Powered by Passion 3D World + AI</p>
             </div>
-        </section>
-
-        <!-- Templates Section -->
-        <section id="templates" class="py-20">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4">20+ Professional Templates</h2>
-                    <p class="text-gray-400 text-lg">Choose from our curated collection</p>
-                </div>
-                
-                <div class="max-w-4xl mx-auto">
-                    <!-- Creative Templates -->
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-bold mb-4 text-blue-400">
-                            <i class="fas fa-palette mr-2"></i>Creative Roles (7 Templates)
-                        </h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4 hover:border-blue-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">Video Editor</div>
-                                        <div class="text-sm text-gray-400">₹5,000 • Hybrid</div>
-                                    </div>
-                                    <i class="fas fa-video text-blue-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4 hover:border-blue-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">3D Artist</div>
-                                        <div class="text-sm text-gray-400">₹6,000 • Office</div>
-                                    </div>
-                                    <i class="fas fa-cube text-purple-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4 hover:border-blue-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">UI/UX Designer</div>
-                                        <div class="text-sm text-gray-400">₹6,000 • Hybrid</div>
-                                    </div>
-                                    <i class="fas fa-paint-brush text-pink-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-4 hover:border-blue-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">+4 More Creative Roles</div>
-                                        <div class="text-sm text-gray-400">Animator, Photographer, etc.</div>
-                                    </div>
-                                    <i class="fas fa-ellipsis-h text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Technical Templates -->
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-bold mb-4 text-purple-400">
-                            <i class="fas fa-code mr-2"></i>Technical Roles (9 Templates)
-                        </h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-gray-900/50 border border-purple-500/30 rounded-xl p-4 hover:border-purple-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">Frontend Developer</div>
-                                        <div class="text-sm text-gray-400">₹7,000 • Hybrid</div>
-                                    </div>
-                                    <i class="fas fa-laptop-code text-blue-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-purple-500/30 rounded-xl p-4 hover:border-purple-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">ML Engineer</div>
-                                        <div class="text-sm text-gray-400">₹9,000 • Hybrid (Highest!)</div>
-                                    </div>
-                                    <i class="fas fa-brain text-green-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-purple-500/30 rounded-xl p-4 hover:border-purple-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">Full Stack Developer</div>
-                                        <div class="text-sm text-gray-400">₹8,000 • Hybrid</div>
-                                    </div>
-                                    <i class="fas fa-server text-purple-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-purple-500/30 rounded-xl p-4 hover:border-purple-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">+6 More Technical Roles</div>
-                                        <div class="text-sm text-gray-400">Backend, Mobile, DevOps, etc.</div>
-                                    </div>
-                                    <i class="fas fa-ellipsis-h text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Business Templates -->
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-bold mb-4 text-green-400">
-                            <i class="fas fa-briefcase mr-2"></i>Business Roles (4 Templates)
-                        </h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="bg-gray-900/50 border border-green-500/30 rounded-xl p-4 hover:border-green-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">Digital Marketing</div>
-                                        <div class="text-sm text-gray-400">₹5,000 • WFH</div>
-                                    </div>
-                                    <i class="fas fa-bullhorn text-orange-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-green-500/30 rounded-xl p-4 hover:border-green-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">Business Analyst</div>
-                                        <div class="text-sm text-gray-400">₹6,000 • Hybrid</div>
-                                    </div>
-                                    <i class="fas fa-chart-line text-green-400"></i>
-                                </div>
-                            </div>
-                            <div class="bg-gray-900/50 border border-green-500/30 rounded-xl p-4 hover:border-green-400 transition">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <div class="font-semibold">+2 More Business Roles</div>
-                                        <div class="text-sm text-gray-400">HR, Sales</div>
-                                    </div>
-                                    <i class="fas fa-ellipsis-h text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center mt-8">
-                        <a href="/offer-letter" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3 rounded-xl font-semibold shadow-lg transition">
-                            <i class="fas fa-arrow-right mr-2"></i>Explore All Templates
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Upload & Edit Section -->
-        <section id="upload" class="py-20 bg-gray-900/30">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4">Upload & Edit Existing Documents</h2>
-                    <p class="text-gray-400 text-lg">Let AI extract and modify your existing PDFs intelligently</p>
-                </div>
-                
-                <div class="max-w-4xl mx-auto">
-                    <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-2xl p-8 shadow-2xl">
-                        <div class="text-center mb-8">
-                            <div class="text-6xl mb-4 text-blue-400">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-2">Upload Your PDF Document</h3>
-                            <p class="text-gray-400">AI will extract content and let you edit it</p>
-                        </div>
-                        
-                        <div class="space-y-6">
-                            <!-- Upload Area -->
-                            <div id="uploadArea" class="border-2 border-dashed border-blue-500/50 rounded-xl p-12 text-center hover:border-blue-400 hover:bg-blue-900/10 transition cursor-pointer">
-                                <input type="file" id="pdfUpload" accept="application/pdf" class="hidden" />
-                                <i class="fas fa-file-upload text-5xl text-blue-400 mb-4"></i>
-                                <p class="text-lg mb-2">Click to upload or drag and drop</p>
-                                <p class="text-sm text-gray-400">PDF files only • Max 10MB</p>
-                            </div>
-                            
-                            <!-- Upload Status -->
-                            <div id="uploadStatus" class="hidden">
-                                <div class="bg-blue-900/30 border border-blue-500 rounded-xl p-4">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-3">
-                                            <i class="fas fa-file-pdf text-2xl text-blue-400"></i>
-                                            <div>
-                                                <div id="fileName" class="font-semibold"></div>
-                                                <div id="fileSize" class="text-sm text-gray-400"></div>
-                                            </div>
-                                        </div>
-                                        <button id="removeFile" class="text-red-400 hover:text-red-300">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                    <div class="mt-4">
-                                        <div class="bg-gray-700 rounded-full h-2">
-                                            <div id="uploadProgress" class="bg-blue-500 h-2 rounded-full transition-all" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Instructions -->
-                            <div class="bg-purple-900/20 border border-purple-500/30 rounded-xl p-6">
-                                <h4 class="font-semibold mb-3 flex items-center">
-                                    <i class="fas fa-lightbulb text-yellow-400 mr-2"></i>
-                                    How it works:
-                                </h4>
-                                <ol class="space-y-2 text-sm text-gray-300">
-                                    <li><span class="text-blue-400 font-bold">1.</span> Upload your existing offer letter or certificate PDF</li>
-                                    <li><span class="text-blue-400 font-bold">2.</span> AI extracts all text and data intelligently</li>
-                                    <li><span class="text-blue-400 font-bold">3.</span> Edit any field - name, position, dates, amounts</li>
-                                    <li><span class="text-blue-400 font-bold">4.</span> Download updated PDF with your changes</li>
-                                </ol>
-                            </div>
-                            
-                            <button id="processButton" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 py-4 rounded-xl font-semibold shadow-lg transition disabled:opacity-50" disabled>
-                                <i class="fas fa-magic mr-2"></i>Process Document with AI
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Testimonials Section -->
-        <section id="testimonials" class="py-20">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-4">What Our Users Say</h2>
-                    <p class="text-gray-400 text-lg">Trusted by HR teams and companies worldwide</p>
-                </div>
-                
-                <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <!-- Testimonial 1 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                A
-                            </div>
-                            <div>
-                                <div class="font-semibold">Ananya Sharma</div>
-                                <div class="text-sm text-gray-400">HR Manager, TechCorp</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"Incredible tool! We used to spend hours creating offer letters. Now it takes just 30 seconds. The AI templates are spot-on!"</p>
-                    </div>
-                    
-                    <!-- Testimonial 2 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-purple-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                R
-                            </div>
-                            <div>
-                                <div class="font-semibold">Rajesh Kumar</div>
-                                <div class="text-sm text-gray-400">Founder, StartupHub</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"The upload and edit feature is a game-changer! Uploaded our old template and modified it instantly. Saved us days of work!"</p>
-                    </div>
-                    
-                    <!-- Testimonial 3 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-green-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                P
-                            </div>
-                            <div>
-                                <div class="font-semibold">Priya Patel</div>
-                                <div class="text-sm text-gray-400">CEO, DesignStudio</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"Professional, fast, and incredibly easy to use. The 20 templates cover all our needs. Highly recommend for any growing company!"</p>
-                    </div>
-                    
-                    <!-- Testimonial 4 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-yellow-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                V
-                            </div>
-                            <div>
-                                <div class="font-semibold">Vikram Singh</div>
-                                <div class="text-sm text-gray-400">Operations Lead, MediaCo</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"The AI understands exactly what we need. We create certificates for 50+ interns every quarter. This tool is a lifesaver!"</p>
-                    </div>
-                    
-                    <!-- Testimonial 5 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-red-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                M
-                            </div>
-                            <div>
-                                <div class="font-semibold">Meera Joshi</div>
-                                <div class="text-sm text-gray-400">Talent Acquisition, FinTech</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"Clean interface, powerful features. The PDF export is perfect. No more formatting headaches!"</p>
-                    </div>
-                    
-                    <!-- Testimonial 6 -->
-                    <div class="testimonial-card bg-gradient-to-br from-gray-900 to-gray-800 border border-indigo-500/30 rounded-2xl p-6">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-xl font-bold mr-3">
-                                S
-                            </div>
-                            <div>
-                                <div class="font-semibold">Sahil Mehta</div>
-                                <div class="text-sm text-gray-400">Director, EduTech Solutions</div>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400 mb-3">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="text-gray-300 italic">"Best document generator I've used. The mobile app works flawlessly. Create docs on the go!"</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="py-20 bg-gray-900/30">
-            <div class="container mx-auto px-4">
-                <div class="max-w-4xl mx-auto">
-                    <div class="text-center mb-12">
-                        <h2 class="text-4xl font-bold mb-4">About Passion 3D World</h2>
-                        <p class="text-gray-400 text-lg">Innovation in Document Automation</p>
-                    </div>
-                    
-                    <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-2xl p-8 mb-8">
-                        <div class="grid md:grid-cols-2 gap-8 items-center">
-                            <div>
-                                <h3 class="text-2xl font-bold mb-4">Our Mission</h3>
-                                <p class="text-gray-300 mb-4">
-                                    At Passion 3D World, we believe document creation should be instant, intelligent, and effortless. 
-                                    Our AI-powered platform helps companies save time and create professional documents in seconds.
-                                </p>
-                                <p class="text-gray-300">
-                                    Trusted by HR teams, startups, and enterprises worldwide to automate their document workflows.
-                                </p>
-                            </div>
-                            <div class="text-5xl text-blue-400 text-center">
-                                <i class="fas fa-award mb-4"></i>
-                                <div class="text-lg text-gray-300">ISO Certified</div>
-                                <div class="text-sm text-gray-400">Quality Assured</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid md:grid-cols-3 gap-6 text-center">
-                        <div class="bg-gray-900/50 border border-blue-500/30 rounded-xl p-6">
-                            <div class="text-3xl text-blue-400 mb-2">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="text-2xl font-bold mb-1">1000+</div>
-                            <div class="text-gray-400">Active Users</div>
-                        </div>
-                        <div class="bg-gray-900/50 border border-purple-500/30 rounded-xl p-6">
-                            <div class="text-3xl text-purple-400 mb-2">
-                                <i class="fas fa-file-alt"></i>
-                            </div>
-                            <div class="text-2xl font-bold mb-1">50K+</div>
-                            <div class="text-gray-400">Documents Created</div>
-                        </div>
-                        <div class="bg-gray-900/50 border border-green-500/30 rounded-xl p-6">
-                            <div class="text-3xl text-green-400 mb-2">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="text-2xl font-bold mb-1">10K+</div>
-                            <div class="text-gray-400">Hours Saved</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-gray-950 border-t border-blue-500/30 py-12">
-            <div class="container mx-auto px-4">
-                <div class="grid md:grid-cols-4 gap-8 mb-8">
-                    <!-- Company Info -->
-                    <div>
-                        <div class="flex items-center space-x-2 mb-4">
-                            <i class="fas fa-file-alt text-blue-400 text-2xl"></i>
-                            <span class="text-xl font-bold">Passion<span class="text-blue-400">3D</span></span>
-                        </div>
-                        <p class="text-gray-400 text-sm">
-                            AI-powered document generation platform for modern businesses.
-                        </p>
-                    </div>
-                    
-                    <!-- Quick Links -->
-                    <div>
-                        <h4 class="font-bold mb-4">Quick Links</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#home" class="text-gray-400 hover:text-blue-400">Home</a></li>
-                            <li><a href="#features" class="text-gray-400 hover:text-blue-400">Features</a></li>
-                            <li><a href="#templates" class="text-gray-400 hover:text-blue-400">Templates</a></li>
-                            <li><a href="#upload" class="text-gray-400 hover:text-blue-400">Upload</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Resources -->
-                    <div>
-                        <h4 class="font-bold mb-4">Resources</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="/offer-letter" class="text-gray-400 hover:text-blue-400">Create Offer Letter</a></li>
-                            <li><a href="/certificate" class="text-gray-400 hover:text-blue-400">Create Certificate</a></li>
-                            <li><a href="#testimonials" class="text-gray-400 hover:text-blue-400">Testimonials</a></li>
-                            <li><a href="#about" class="text-gray-400 hover:text-blue-400">About Us</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Contact -->
-                    <div>
-                        <h4 class="font-bold mb-4">Contact</h4>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            <li><i class="fas fa-envelope mr-2 text-blue-400"></i>passion3dworld@gmail.com</li>
-                            <li><i class="fas fa-phone mr-2 text-blue-400"></i>+91 9137361474</li>
-                            <li><i class="fas fa-map-marker-alt mr-2 text-blue-400"></i>Mumbai, India</li>
-                        </ul>
-                        <div class="flex space-x-4 mt-4">
-                            <a href="#" class="text-gray-400 hover:text-blue-400 text-xl"><i class="fab fa-linkedin"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-blue-400 text-xl"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-blue-400 text-xl"><i class="fab fa-facebook"></i></a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-                    <p>&copy; 2025 Passion 3D World. All rights reserved. | Powered by AI</p>
-                </div>
-            </div>
-        </footer>
-
-        <!-- Upload Script -->
-        <script>
-            const uploadArea = document.getElementById('uploadArea');
-            const pdfUpload = document.getElementById('pdfUpload');
-            const uploadStatus = document.getElementById('uploadStatus');
-            const processButton = document.getElementById('processButton');
-            const removeFile = document.getElementById('removeFile');
-            
-            // Click to upload
-            uploadArea.addEventListener('click', () => pdfUpload.click());
-            
-            // File selected
-            pdfUpload.addEventListener('change', handleFileSelect);
-            
-            // Drag and drop
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('border-blue-400', 'bg-blue-900/20');
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('border-blue-400', 'bg-blue-900/20');
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('border-blue-400', 'bg-blue-900/20');
-                const file = e.dataTransfer.files[0];
-                if (file && file.type === 'application/pdf') {
-                    handleFile(file);
-                }
-            });
-            
-            function handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (file) handleFile(file);
-            }
-            
-            function handleFile(file) {
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-                uploadStatus.classList.remove('hidden');
-                uploadArea.classList.add('hidden');
-                processButton.disabled = false;
-                
-                // Simulate upload progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 10;
-                    document.getElementById('uploadProgress').style.width = progress + '%';
-                    if (progress >= 100) clearInterval(interval);
-                }, 100);
-            }
-            
-            removeFile.addEventListener('click', () => {
-                uploadStatus.classList.add('hidden');
-                uploadArea.classList.remove('hidden');
-                pdfUpload.value = '';
-                processButton.disabled = true;
-                document.getElementById('uploadProgress').style.width = '0%';
-            });
-            
-            processButton.addEventListener('click', () => {
-                alert('PDF Upload & Edit feature coming soon! \\n\\nThis will:\\n1. Extract all text from your PDF\\n2. Let you edit fields\\n3. Generate updated PDF\\n\\nFor now, use "Create Offer Letter" to generate new documents.');
-            });
-        </script>
+        </div>
     </body>
     </html>
   `)
@@ -1776,6 +1280,5 @@ app.get('/certificate', (c) => {
     </html>
   `)
 })
-
 
 export default app
