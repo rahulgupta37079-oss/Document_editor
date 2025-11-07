@@ -225,12 +225,13 @@ webapp/
 
 ## Technologies Used
 - **Backend Framework**: Hono - Lightweight web framework for edge computing
-- **Frontend Styling**: TailwindCSS (CDN)
+- **Frontend Styling**: TailwindCSS (CDN) with custom dark blue, white, and black theme
 - **Icons**: FontAwesome (v6.4.0)
 - **PDF Generation**: html2pdf.js (v0.10.1)
 - **Build Tool**: Vite
 - **Deployment**: Cloudflare Pages
 - **Process Manager**: PM2 (for development)
+- **Design Theme**: Dark mode with navy blue gradients, white text, and black accents
 
 ## License
 Proprietary - Passion 3D World
