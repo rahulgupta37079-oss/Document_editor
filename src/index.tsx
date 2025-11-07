@@ -187,6 +187,185 @@ app.get('/api/templates', (c) => {
   return c.json({ templates })
 })
 
+// API endpoint to process uploaded PDF text
+app.post('/api/process-pdf', async (c) => {
+  try {
+    const { text, filename, useRealAI } = await c.req.json()
+    
+    if (!text || text.length < 10) {
+      return c.json({ error: 'Invalid or empty PDF text' }, 400)
+    }
+    
+    // AI extraction prompt
+    const extractionPrompt = `Extract information from this document text and return ONLY a JSON object with these fields:
+    
+Document text:
+${text}
+
+Return JSON format:
+{
+  "type": "offer_letter" or "certificate",
+  "candidateName": "full name",
+  "position": "job title",
+  "date": "YYYY-MM-DD",
+  "startDate": "YYYY-MM-DD",
+  "endDate": "YYYY-MM-DD",
+  "stipend": number,
+  "workLocation": "Work From Home" or "Office" or "Hybrid",
+  "performance": "Excellent" or "Very Good" or "Good",
+  "achievements": "text of achievements"
+}
+
+Extract as many fields as possible. Use null for missing fields.`
+
+    let extractedData: any = {}
+    
+    // Try real AI if requested
+    if (useRealAI) {
+      const groqKey = c.env.GROQ_API_KEY
+      
+      if (groqKey) {
+        try {
+          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + groqKey
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-8b-instant',
+              messages: [{
+                role: 'user',
+                content: extractionPrompt
+              }],
+              temperature: 0.3,
+              max_tokens: 1000
+            })
+          })
+
+          if (response.ok) {
+            const data = await response.json() as any
+            const content = data.choices?.[0]?.message?.content || '{}'
+            
+            // Try to parse JSON from AI response
+            try {
+              // Extract JSON from markdown code blocks if present
+              const jsonMatch = content.match(/\{[\s\S]*\}/)
+              if (jsonMatch) {
+                extractedData = JSON.parse(jsonMatch[0])
+                extractedData.aiUsed = 'groq'
+              }
+            } catch (e) {
+              console.log('Failed to parse AI JSON response')
+            }
+          }
+        } catch (error) {
+          console.log('Groq API failed, using pattern matching')
+        }
+      }
+    }
+    
+    // Fallback: Smart pattern matching
+    if (!extractedData.candidateName) {
+      const lines = text.split('\n').filter(l => l.trim())
+      
+      // Detect document type
+      const lowerText = text.toLowerCase()
+      extractedData.type = lowerText.includes('certificate') ? 'certificate' : 'offer_letter'
+      
+      // Extract name (usually after "To," or "This is to certify that")
+      const namePatterns = [
+        /To,?\s*\n\s*([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*\n/,
+        /certify that\s+([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+has/i,
+        /Dear\s+([A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?),/
+      ]
+      
+      for (const pattern of namePatterns) {
+        const match = text.match(pattern)
+        if (match) {
+          extractedData.candidateName = match[1].trim()
+          break
+        }
+      }
+      
+      // Extract position
+      const positionPatterns = [
+        /(?:as|position of|role of)\s+"([^"]+)"/i,
+        /(?:as|position of|role of)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,4})\s+(?:at|in)/i,
+        /(?:selected as|appointed as)\s+"([^"]+)"/i
+      ]
+      
+      for (const pattern of positionPatterns) {
+        const match = text.match(pattern)
+        if (match) {
+          extractedData.position = match[1].trim()
+          break
+        }
+      }
+      
+      // Extract dates
+      const datePattern = /(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December),?\s+\d{4})/gi
+      const dates = text.match(datePattern) || []
+      
+      if (dates.length > 0) {
+        extractedData.date = dates[0]
+      }
+      if (dates.length > 1) {
+        extractedData.startDate = dates[0]
+        extractedData.endDate = dates[1]
+      }
+      
+      // Extract stipend
+      const stipendPattern = /₹\s*(\d+,?\d*)/
+      const stipendMatch = text.match(stipendPattern)
+      if (stipendMatch) {
+        extractedData.stipend = parseInt(stipendMatch[1].replace(',', ''))
+      }
+      
+      // Extract work location
+      if (lowerText.includes('work from home') || lowerText.includes('remote')) {
+        extractedData.workLocation = 'Work From Home'
+      } else if (lowerText.includes('hybrid')) {
+        extractedData.workLocation = 'Hybrid'
+      } else if (lowerText.includes('office')) {
+        extractedData.workLocation = 'Office'
+      }
+      
+      // Extract performance (for certificates)
+      if (extractedData.type === 'certificate') {
+        if (lowerText.includes('excellent')) extractedData.performance = 'Excellent'
+        else if (lowerText.includes('very good')) extractedData.performance = 'Very Good'
+        else if (lowerText.includes('good')) extractedData.performance = 'Good'
+        else extractedData.performance = 'Satisfactory'
+        
+        // Try to extract achievements section
+        const achievementsPattern = /(?:skills|achievements|contributions)[:\s]+([^\.]+(?:\.[^\.]+){0,3})/i
+        const achievementsMatch = text.match(achievementsPattern)
+        if (achievementsMatch) {
+          extractedData.achievements = achievementsMatch[1].trim()
+        }
+      }
+      
+      extractedData.aiUsed = 'pattern_matching'
+    }
+    
+    return c.json({
+      success: true,
+      data: extractedData,
+      filename: filename,
+      extractedTextLength: text.length,
+      message: extractedData.aiUsed === 'groq' ? 'Extracted with AI Pro' : 'Extracted with Smart Pattern Matching'
+    })
+    
+  } catch (error) {
+    console.error('PDF processing error:', error)
+    return c.json({ 
+      error: 'Failed to process PDF',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
 // AI content generation
 app.post('/api/generate-content', async (c) => {
   try {
@@ -868,13 +1047,20 @@ app.get('/', (c) => {
             </div>
         </footer>
 
-        <!-- Upload Script -->
+        <!-- PDF.js Library -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <script>
+            // Configure PDF.js worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            
             const uploadArea = document.getElementById('uploadArea');
             const pdfUpload = document.getElementById('pdfUpload');
             const uploadStatus = document.getElementById('uploadStatus');
             const processButton = document.getElementById('processButton');
             const removeFile = document.getElementById('removeFile');
+            
+            let currentFile = null;
+            let extractedText = '';
             
             // Click to upload
             uploadArea.addEventListener('click', () => pdfUpload.click());
@@ -906,32 +1092,116 @@ app.get('/', (c) => {
                 if (file) handleFile(file);
             }
             
-            function handleFile(file) {
+            async function handleFile(file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File too large! Maximum size is 10MB.');
+                    return;
+                }
+                
+                currentFile = file;
                 document.getElementById('fileName').textContent = file.name;
                 document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
                 uploadStatus.classList.remove('hidden');
                 uploadArea.classList.add('hidden');
-                processButton.disabled = false;
                 
-                // Simulate upload progress
+                // Show upload progress
                 let progress = 0;
                 const interval = setInterval(() => {
-                    progress += 10;
+                    progress += 20;
                     document.getElementById('uploadProgress').style.width = progress + '%';
-                    if (progress >= 100) clearInterval(interval);
-                }, 100);
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        extractPDFText(file);
+                    }
+                }, 200);
             }
             
-            removeFile.addEventListener('click', () => {
+            async function extractPDFText(file) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    
+                    let fullText = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(' ');
+                        fullText += pageText + '\\n';
+                    }
+                    
+                    extractedText = fullText;
+                    processButton.disabled = false;
+                    
+                    // Update button text to show ready
+                    processButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>PDF Loaded - Process with AI';
+                    processButton.classList.add('animate-pulse');
+                    
+                } catch (error) {
+                    console.error('PDF extraction error:', error);
+                    alert('Failed to extract text from PDF. Please try another file.');
+                    removeFileHandler();
+                }
+            }
+            
+            removeFile.addEventListener('click', removeFileHandler);
+            
+            function removeFileHandler() {
                 uploadStatus.classList.add('hidden');
                 uploadArea.classList.remove('hidden');
                 pdfUpload.value = '';
                 processButton.disabled = true;
+                processButton.innerHTML = '<i class="fas fa-magic mr-2"></i>Process Document with AI';
+                processButton.classList.remove('animate-pulse');
                 document.getElementById('uploadProgress').style.width = '0%';
-            });
+                currentFile = null;
+                extractedText = '';
+            }
             
-            processButton.addEventListener('click', () => {
-                alert('PDF Upload & Edit feature coming soon! \\n\\nThis will:\\n1. Extract all text from your PDF\\n2. Let you edit fields\\n3. Generate updated PDF\\n\\nFor now, use "Create Offer Letter" to generate new documents.');
+            processButton.addEventListener('click', async () => {
+                if (!extractedText || !currentFile) {
+                    alert('Please upload a PDF first');
+                    return;
+                }
+                
+                const originalHTML = processButton.innerHTML;
+                processButton.disabled = true;
+                processButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI Processing...';
+                
+                try {
+                    const response = await fetch('/api/process-pdf', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            text: extractedText,
+                            filename: currentFile.name,
+                            useRealAI: true // Try AI first, fallback to pattern matching
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Store extracted data in sessionStorage
+                        sessionStorage.setItem('extractedData', JSON.stringify(result.data));
+                        sessionStorage.setItem('extractionMessage', result.message);
+                        
+                        // Redirect to appropriate page based on document type
+                        if (result.data.type === 'certificate') {
+                            window.location.href = '/certificate?from=upload';
+                        } else {
+                            window.location.href = '/offer-letter?from=upload';
+                        }
+                    } else {
+                        alert('Failed to process PDF: ' + (result.error || 'Unknown error'));
+                        processButton.disabled = false;
+                        processButton.innerHTML = originalHTML;
+                    }
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    alert('Failed to process document. Please try again.');
+                    processButton.disabled = false;
+                    processButton.innerHTML = originalHTML;
+                }
             });
         </script>
     </body>
@@ -1181,6 +1451,74 @@ app.get('/offer-letter', (c) => {
             const endDate = new Date();
             endDate.setFullYear(endDate.getFullYear() + 1);
             document.getElementById('endDate').valueAsDate = endDate;
+            
+            // Check if coming from PDF upload
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('from') === 'upload') {
+                const extractedData = sessionStorage.getItem('extractedData');
+                const extractionMessage = sessionStorage.getItem('extractionMessage');
+                
+                if (extractedData) {
+                    try {
+                        const data = JSON.parse(extractedData);
+                        
+                        // Pre-fill form with extracted data
+                        if (data.candidateName) document.getElementById('candidateName').value = data.candidateName;
+                        if (data.position) document.getElementById('position').value = data.position;
+                        if (data.stipend) document.getElementById('stipend').value = data.stipend;
+                        if (data.workLocation) document.getElementById('workLocation').value = data.workLocation;
+                        
+                        // Parse and set dates
+                        if (data.date) {
+                            try {
+                                const parsedDate = new Date(data.date);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    document.getElementById('date').valueAsDate = parsedDate;
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        if (data.startDate) {
+                            try {
+                                const parsedDate = new Date(data.startDate);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    document.getElementById('startDate').valueAsDate = parsedDate;
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        if (data.endDate) {
+                            try {
+                                const parsedDate = new Date(data.endDate);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    document.getElementById('endDate').valueAsDate = parsedDate;
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        // Show success message
+                        if (extractionMessage) {
+                            const banner = document.createElement('div');
+                            banner.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+                            banner.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + extractionMessage + ' - Review and edit below';
+                            document.body.appendChild(banner);
+                            setTimeout(() => banner.remove(), 5000);
+                        }
+                        
+                        // Clear session storage
+                        sessionStorage.removeItem('extractedData');
+                        sessionStorage.removeItem('extractionMessage');
+                        
+                        // Auto-generate preview
+                        setTimeout(() => {
+                            generateDocument();
+                        }, 500);
+                        
+                    } catch (e) {
+                        console.error('Failed to parse extracted data:', e);
+                    }
+                }
+            }
 
             document.getElementById('offerForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1618,6 +1956,69 @@ app.get('/certificate', (c) => {
             startDate.setFullYear(startDate.getFullYear() - 1);
             document.getElementById('certStartDate').valueAsDate = startDate;
             document.getElementById('certEndDate').valueAsDate = new Date();
+            
+            // Check if coming from PDF upload
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('from') === 'upload') {
+                const extractedData = sessionStorage.getItem('extractedData');
+                const extractionMessage = sessionStorage.getItem('extractionMessage');
+                
+                if (extractedData) {
+                    try {
+                        const data = JSON.parse(extractedData);
+                        
+                        // Pre-fill form with extracted data
+                        if (data.candidateName) document.getElementById('recipientName').value = data.candidateName;
+                        if (data.position) document.getElementById('role').value = data.position;
+                        if (data.performance) document.getElementById('performance').value = data.performance;
+                        if (data.achievements) document.getElementById('achievements').value = data.achievements;
+                        
+                        // Parse and set dates
+                        if (data.startDate) {
+                            try {
+                                const parsedDate = new Date(data.startDate);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    document.getElementById('certStartDate').valueAsDate = parsedDate;
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        if (data.endDate) {
+                            try {
+                                const parsedDate = new Date(data.endDate);
+                                if (!isNaN(parsedDate.getTime())) {
+                                    document.getElementById('certEndDate').valueAsDate = parsedDate;
+                                }
+                            } catch (e) {}
+                        }
+                        
+                        // Generate certificate ID if not present
+                        const certId = 'P3DW-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+                        document.getElementById('certificateId').value = certId;
+                        
+                        // Show success message
+                        if (extractionMessage) {
+                            const banner = document.createElement('div');
+                            banner.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-pulse';
+                            banner.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + extractionMessage + ' - Review and edit below';
+                            document.body.appendChild(banner);
+                            setTimeout(() => banner.remove(), 5000);
+                        }
+                        
+                        // Clear session storage
+                        sessionStorage.removeItem('extractedData');
+                        sessionStorage.removeItem('extractionMessage');
+                        
+                        // Auto-generate preview
+                        setTimeout(() => {
+                            generateCertificate();
+                        }, 500);
+                        
+                    } catch (e) {
+                        console.error('Failed to parse extracted data:', e);
+                    }
+                }
+            }
 
             document.getElementById('certificateForm').addEventListener('submit', function(e) {
                 e.preventDefault();
