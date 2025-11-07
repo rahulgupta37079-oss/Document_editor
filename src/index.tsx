@@ -22,61 +22,64 @@ app.get('/', (c) => {
                 .no-print { display: none !important; }
                 .print-content { margin: 0; padding: 20px; }
             }
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c1629 100%);
+            }
         </style>
     </head>
-    <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <body class="min-h-screen">
         <div class="container mx-auto px-4 py-8">
             <div class="text-center mb-12">
-                <h1 class="text-5xl font-bold text-indigo-900 mb-4">
-                    <i class="fas fa-file-alt mr-3"></i>
+                <h1 class="text-5xl font-bold text-white mb-4">
+                    <i class="fas fa-file-alt mr-3 text-blue-400"></i>
                     Document Generator
                 </h1>
-                <p class="text-xl text-gray-700">Passion 3D World - Automated Document Creation</p>
+                <p class="text-xl text-gray-300">Passion 3D World - Automated Document Creation</p>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 <!-- Offer Letter Card -->
-                <div class="bg-white rounded-xl shadow-2xl p-8 hover:shadow-3xl transition-shadow duration-300">
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-xl shadow-2xl p-8 hover:shadow-blue-500/50 transition-all duration-300 hover:border-blue-400">
                     <div class="text-center mb-6">
-                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-briefcase text-4xl text-blue-600"></i>
+                        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                            <i class="fas fa-briefcase text-4xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Offer Letter</h2>
-                        <p class="text-gray-600">Generate customized internship offer letters</p>
+                        <h2 class="text-2xl font-bold text-white mb-2">Offer Letter</h2>
+                        <p class="text-gray-400">Generate customized internship offer letters</p>
                     </div>
-                    <ul class="text-sm text-gray-600 mb-6 space-y-2">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Customizable candidate details</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Flexible terms & conditions</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>PDF export ready</li>
+                    <ul class="text-sm text-gray-300 mb-6 space-y-2">
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Customizable candidate details</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Flexible terms & conditions</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
                     </ul>
-                    <a href="/offer-letter" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200">
+                    <a href="/offer-letter" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200 shadow-lg shadow-blue-600/50">
                         Create Offer Letter <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
 
                 <!-- Certificate Card -->
-                <div class="bg-white rounded-xl shadow-2xl p-8 hover:shadow-3xl transition-shadow duration-300">
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-xl shadow-2xl p-8 hover:shadow-blue-500/50 transition-all duration-300 hover:border-blue-400">
                     <div class="text-center mb-6">
-                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-certificate text-4xl text-green-600"></i>
+                        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                            <i class="fas fa-certificate text-4xl text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Certificate</h2>
-                        <p class="text-gray-600">Generate professional completion certificates</p>
+                        <h2 class="text-2xl font-bold text-white mb-2">Certificate</h2>
+                        <p class="text-gray-400">Generate professional completion certificates</p>
                     </div>
-                    <ul class="text-sm text-gray-600 mb-6 space-y-2">
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Customizable recipient details</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>Professional formatting</li>
-                        <li><i class="fas fa-check text-green-500 mr-2"></i>PDF export ready</li>
+                    <ul class="text-sm text-gray-300 mb-6 space-y-2">
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Customizable recipient details</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>Professional formatting</li>
+                        <li><i class="fas fa-check text-blue-400 mr-2"></i>PDF export ready</li>
                     </ul>
-                    <a href="/certificate" class="block w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200">
+                    <a href="/certificate" class="block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors duration-200 shadow-lg shadow-blue-600/50">
                         Create Certificate <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="mt-12 text-center text-gray-600">
-                <p class="mb-2"><i class="fas fa-info-circle mr-2"></i>All documents can be edited and exported as PDF</p>
-                <p class="text-sm">Powered by Passion 3D World</p>
+            <div class="mt-12 text-center text-gray-400">
+                <p class="mb-2"><i class="fas fa-info-circle mr-2 text-blue-400"></i>All documents can be edited and exported as PDF</p>
+                <p class="text-sm text-gray-500">Powered by Passion 3D World</p>
             </div>
         </div>
     </body>
@@ -102,16 +105,32 @@ app.get('/offer-letter', (c) => {
                 .print-content { margin: 0; padding: 40px; page-break-inside: avoid; }
                 body { background: white; }
             }
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c1629 100%);
+            }
+            input, select, textarea {
+                background-color: #1e293b;
+                color: white;
+                border-color: #475569;
+            }
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            input::placeholder, textarea::placeholder {
+                color: #64748b;
+            }
         </style>
     </head>
-    <body class="bg-gray-50">
+    <body class="min-h-screen">
         <div class="no-print">
-            <div class="bg-indigo-900 text-white py-4 px-6 shadow-lg">
+            <div class="bg-black border-b border-blue-500 shadow-lg shadow-blue-500/20 py-4 px-6">
                 <div class="container mx-auto flex justify-between items-center">
                     <div>
-                        <a href="/" class="text-white hover:text-indigo-200"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
+                        <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
                     </div>
-                    <h1 class="text-2xl font-bold">Offer Letter Generator</h1>
+                    <h1 class="text-2xl font-bold text-white">Offer Letter Generator</h1>
                     <div></div>
                 </div>
             </div>
@@ -120,76 +139,76 @@ app.get('/offer-letter', (c) => {
         <div class="container mx-auto px-4 py-8">
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Form Section -->
-                <div class="no-print bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-edit mr-2"></i>Fill Details</h2>
+                <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-6">
+                    <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
                     
                     <form id="offerForm" class="space-y-4">
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Document Details</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Document Details</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                                    <input type="date" id="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Date</label>
+                                    <input type="date" id="date" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Candidate Information</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Candidate Information</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input type="text" id="candidateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                                    <input type="text" id="candidateName" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                                    <input type="text" id="position" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" value="Research and Development Intern" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Position</label>
+                                    <input type="text" id="position" class="w-full px-3 py-2 border rounded-lg" value="Research and Development Intern" required>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Internship Period</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Internship Period</h3>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                    <input type="date" id="startDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
+                                    <input type="date" id="startDate" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                    <input type="date" id="endDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">End Date</label>
+                                    <input type="date" id="endDate" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Probation Period (months)</label>
-                                <input type="number" id="probationMonths" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" value="3" min="1" required>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Probation Period (months)</label>
+                                <input type="number" id="probationMonths" class="w-full px-3 py-2 border rounded-lg" value="3" min="1" required>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Work Details</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Work Details</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Work Location</label>
-                                    <select id="workLocation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Work Location</label>
+                                    <select id="workLocation" class="w-full px-3 py-2 border rounded-lg">
                                         <option value="Work From Home">Work From Home</option>
                                         <option value="Office">Office</option>
                                         <option value="Hybrid">Hybrid</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Working Hours</label>
-                                    <input type="text" id="workingHours" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" value="Flexible and Part-time (8 hrs/day)">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Working Hours</label>
+                                    <input type="text" id="workingHours" class="w-full px-3 py-2 border rounded-lg" value="Flexible and Part-time (8 hrs/day)">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Stipend (₹)</label>
-                                    <input type="number" id="stipend" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" value="3000" min="0" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Monthly Stipend (₹)</label>
+                                    <input type="number" id="stipend" class="w-full px-3 py-2 border rounded-lg" value="3000" min="0" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="pt-4">
-                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-600/50">
                                 <i class="fas fa-sync mr-2"></i>Generate Preview
                             </button>
                         </div>
@@ -198,18 +217,18 @@ app.get('/offer-letter', (c) => {
 
                 <!-- Preview Section -->
                 <div>
-                    <div class="no-print bg-white rounded-lg shadow-lg p-4 mb-4">
+                    <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-4 mb-4">
                         <div class="flex gap-3">
-                            <button onclick="downloadPDF()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                            <button onclick="downloadPDF()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-600/30">
                                 <i class="fas fa-download mr-2"></i>Download PDF
                             </button>
-                            <button onclick="window.print()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                            <button onclick="window.print()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-print mr-2"></i>Print
                             </button>
                         </div>
                     </div>
 
-                    <div id="documentPreview" class="bg-white rounded-lg shadow-lg p-8 print-content" style="min-height: 600px;">
+                    <div id="documentPreview" class="bg-white rounded-lg shadow-2xl shadow-blue-500/10 p-8 print-content" style="min-height: 600px;">
                         <div class="text-center text-gray-400 py-20">
                             <i class="fas fa-file-alt text-6xl mb-4"></i>
                             <p class="text-xl">Fill the form to generate preview</p>
@@ -256,21 +275,21 @@ app.get('/offer-letter', (c) => {
                 const documentHTML = \`
                 <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; line-height: 1.6;">
                     <!-- Header -->
-                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #4F46E5; padding-bottom: 20px;">
-                        <h1 style="color: #4F46E5; font-size: 28px; margin: 0 0 10px 0;">PASSION 3D WORLD</h1>
-                        <p style="color: #6B7280; font-style: italic; margin: 0 0 10px 0;">Make your passion a reality!</p>
-                        <p style="color: #374151; font-size: 14px; margin: 5px 0;">Kashimira, Mira Road (E), Mumbai, Maharashtra, India</p>
-                        <p style="color: #374151; font-size: 14px; margin: 5px 0;">Contact: +91 9137361474 | passion3dworld@gmail.com</p>
+                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px;">
+                        <h1 style="color: #1e3a8a; font-size: 28px; margin: 0 0 10px 0;">PASSION 3D WORLD</h1>
+                        <p style="color: #3b82f6; font-style: italic; margin: 0 0 10px 0;">Make your passion a reality!</p>
+                        <p style="color: #1f2937; font-size: 14px; margin: 5px 0;">Kashimira, Mira Road (E), Mumbai, Maharashtra, India</p>
+                        <p style="color: #1f2937; font-size: 14px; margin: 5px 0;">Contact: +91 9137361474 | passion3dworld@gmail.com</p>
                     </div>
 
                     <!-- Title -->
-                    <h2 style="text-align: center; color: #1F2937; font-size: 24px; margin: 30px 0;">Internship Offer Letter</h2>
+                    <h2 style="text-align: center; color: #000000; font-size: 24px; margin: 30px 0;">Internship Offer Letter</h2>
 
                     <!-- Date -->
-                    <p style="text-align: right; color: #374151; margin-bottom: 30px;"><strong>Date:</strong> \${formatDate(data.date)}</p>
+                    <p style="text-align: right; color: #1f2937; margin-bottom: 30px;"><strong>Date:</strong> \${formatDate(data.date)}</p>
 
                     <!-- Content -->
-                    <div style="color: #374151; font-size: 15px;">
+                    <div style="color: #1f2937; font-size: 15px;">
                         <p style="margin-bottom: 20px;">To,<br><strong>\${data.candidateName}</strong></p>
 
                         <p style="margin-bottom: 20px;">With reference to your interview, we are pleased to inform you that you have been selected as "<strong>\${data.position}</strong>" at PASSION 3D WORLD with the following terms and conditions:</p>
@@ -306,20 +325,20 @@ app.get('/offer-letter', (c) => {
                             <div style="width: 45%;">
                                 <div style="border-top: 2px solid #000; padding-top: 10px; margin-bottom: 5px;"></div>
                                 <p style="margin: 5px 0;"><strong>Candidate Signature</strong></p>
-                                <p style="margin: 5px 0; color: #6B7280;">Name: \${data.candidateName}</p>
-                                <p style="margin: 5px 0; color: #6B7280;">Date: __________</p>
+                                <p style="margin: 5px 0; color: #6b7280;">Name: \${data.candidateName}</p>
+                                <p style="margin: 5px 0; color: #6b7280;">Date: __________</p>
                             </div>
                             <div style="width: 45%;">
                                 <div style="border-top: 2px solid #000; padding-top: 10px; margin-bottom: 5px;"></div>
                                 <p style="margin: 5px 0;"><strong>Company Representative</strong></p>
-                                <p style="margin: 5px 0; color: #6B7280;">Rahul Gupta</p>
-                                <p style="margin: 5px 0; color: #6B7280;">CEO, Passion 3D World</p>
+                                <p style="margin: 5px 0; color: #6b7280;">Rahul Gupta</p>
+                                <p style="margin: 5px 0; color: #6b7280;">CEO, Passion 3D World</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Footer -->
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #E5E7EB; text-align: center; color: #6B7280; font-size: 12px;">
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
                         <p>This is a computer-generated document and does not require a physical signature.</p>
                     </div>
                 </div>
@@ -363,16 +382,32 @@ app.get('/certificate', (c) => {
                 .print-content { margin: 0; padding: 0; page-break-inside: avoid; }
                 body { background: white; }
             }
+            body {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c1629 100%);
+            }
+            input, select, textarea {
+                background-color: #1e293b;
+                color: white;
+                border-color: #475569;
+            }
+            input:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            input::placeholder, textarea::placeholder {
+                color: #64748b;
+            }
         </style>
     </head>
-    <body class="bg-gray-50">
+    <body class="min-h-screen">
         <div class="no-print">
-            <div class="bg-green-900 text-white py-4 px-6 shadow-lg">
+            <div class="bg-black border-b border-blue-500 shadow-lg shadow-blue-500/20 py-4 px-6">
                 <div class="container mx-auto flex justify-between items-center">
                     <div>
-                        <a href="/" class="text-white hover:text-green-200"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
+                        <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors"><i class="fas fa-arrow-left mr-2"></i>Back to Home</a>
                     </div>
-                    <h1 class="text-2xl font-bold">Certificate Generator</h1>
+                    <h1 class="text-2xl font-bold text-white">Certificate Generator</h1>
                     <div></div>
                 </div>
             </div>
@@ -381,44 +416,44 @@ app.get('/certificate', (c) => {
         <div class="container mx-auto px-4 py-8">
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Form Section -->
-                <div class="no-print bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fas fa-edit mr-2"></i>Fill Details</h2>
+                <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-6">
+                    <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-edit mr-2 text-blue-400"></i>Fill Details</h2>
                     
                     <form id="certificateForm" class="space-y-4">
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Recipient Information</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Recipient Information</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input type="text" id="recipientName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                                    <input type="text" id="recipientName" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Position/Role</label>
-                                    <input type="text" id="role" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" value="Research and Development Intern" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Position/Role</label>
+                                    <input type="text" id="role" class="w-full px-3 py-2 border rounded-lg" value="Research and Development Intern" required>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Period Details</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Period Details</h3>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                    <input type="date" id="certStartDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
+                                    <input type="date" id="certStartDate" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                    <input type="date" id="certEndDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">End Date</label>
+                                    <input type="date" id="certEndDate" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Performance & Skills</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Performance & Skills</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Performance Rating</label>
-                                    <select id="performance" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Performance Rating</label>
+                                    <select id="performance" class="w-full px-3 py-2 border rounded-lg">
                                         <option value="Excellent">Excellent</option>
                                         <option value="Very Good">Very Good</option>
                                         <option value="Good">Good</option>
@@ -426,28 +461,28 @@ app.get('/certificate', (c) => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Key Skills/Achievements</label>
-                                    <textarea id="achievements" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" rows="3" placeholder="Video Creation, 3D Modeling, Software Testing..."></textarea>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Key Skills/Achievements</label>
+                                    <textarea id="achievements" class="w-full px-3 py-2 border rounded-lg" rows="3" placeholder="Video Creation, 3D Modeling, Software Testing..."></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-b pb-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-3">Certificate Details</h3>
+                        <div class="border-b border-gray-700 pb-4">
+                            <h3 class="text-lg font-semibold text-blue-400 mb-3">Certificate Details</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Certificate ID</label>
-                                    <input type="text" id="certificateId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="P3DW-2025-001" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Certificate ID</label>
+                                    <input type="text" id="certificateId" class="w-full px-3 py-2 border rounded-lg" placeholder="P3DW-2025-001" required>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Issue Date</label>
-                                    <input type="date" id="issueDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Issue Date</label>
+                                    <input type="date" id="issueDate" class="w-full px-3 py-2 border rounded-lg" required>
                                 </div>
                             </div>
                         </div>
 
                         <div class="pt-4">
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-600/50">
                                 <i class="fas fa-sync mr-2"></i>Generate Preview
                             </button>
                         </div>
@@ -456,18 +491,18 @@ app.get('/certificate', (c) => {
 
                 <!-- Preview Section -->
                 <div>
-                    <div class="no-print bg-white rounded-lg shadow-lg p-4 mb-4">
+                    <div class="no-print bg-gradient-to-br from-gray-900 to-gray-800 border border-blue-500 rounded-lg shadow-2xl shadow-blue-500/20 p-4 mb-4">
                         <div class="flex gap-3">
-                            <button onclick="downloadCertificatePDF()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                            <button onclick="downloadCertificatePDF()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-lg shadow-blue-600/30">
                                 <i class="fas fa-download mr-2"></i>Download PDF
                             </button>
-                            <button onclick="window.print()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                            <button onclick="window.print()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-print mr-2"></i>Print
                             </button>
                         </div>
                     </div>
 
-                    <div id="certificatePreview" class="bg-white rounded-lg shadow-lg print-content" style="min-height: 600px;">
+                    <div id="certificatePreview" class="bg-white rounded-lg shadow-2xl shadow-blue-500/10 print-content" style="min-height: 600px;">
                         <div class="text-center text-gray-400 py-20 px-8">
                             <i class="fas fa-certificate text-6xl mb-4"></i>
                             <p class="text-xl">Fill the form to generate preview</p>
@@ -510,47 +545,47 @@ app.get('/certificate', (c) => {
                 };
 
                 const certificateHTML = \`
-                <div style="font-family: 'Georgia', serif; max-width: 900px; margin: 0 auto; padding: 60px; border: 15px double #4F46E5; background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);">
+                <div style="font-family: 'Georgia', serif; max-width: 900px; margin: 0 auto; padding: 60px; border: 15px double #1e3a8a; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
                     <!-- Decorative Header Border -->
-                    <div style="border-bottom: 3px solid #4F46E5; margin-bottom: 30px; padding-bottom: 20px;">
+                    <div style="border-bottom: 3px solid #1e3a8a; margin-bottom: 30px; padding-bottom: 20px;">
                         <div style="text-align: center;">
-                            <h1 style="color: #4F46E5; font-size: 42px; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase;">Certificate of Completion</h1>
-                            <div style="width: 100px; height: 3px; background: linear-gradient(to right, #4F46E5, #10B981); margin: 15px auto;"></div>
+                            <h1 style="color: #1e3a8a; font-size: 42px; margin: 0 0 10px 0; letter-spacing: 2px; text-transform: uppercase;">Certificate of Completion</h1>
+                            <div style="width: 100px; height: 3px; background: linear-gradient(to right, #1e3a8a, #3b82f6); margin: 15px auto;"></div>
                         </div>
                     </div>
 
                     <!-- Company Header -->
                     <div style="text-align: center; margin-bottom: 40px;">
-                        <h2 style="color: #1F2937; font-size: 32px; margin: 0 0 10px 0; font-weight: bold;">PASSION 3D WORLD</h2>
-                        <p style="color: #6B7280; font-style: italic; font-size: 16px; margin: 5px 0;">Make your passion a reality!</p>
-                        <p style="color: #374151; font-size: 14px; margin: 10px 0;">Kashimira, Mira Road (E), Mumbai, Maharashtra, India</p>
+                        <h2 style="color: #000000; font-size: 32px; margin: 0 0 10px 0; font-weight: bold;">PASSION 3D WORLD</h2>
+                        <p style="color: #3b82f6; font-style: italic; font-size: 16px; margin: 5px 0;">Make your passion a reality!</p>
+                        <p style="color: #1f2937; font-size: 14px; margin: 10px 0;">Kashimira, Mira Road (E), Mumbai, Maharashtra, India</p>
                     </div>
 
                     <!-- Certificate Body -->
-                    <div style="text-align: center; margin: 40px 0; padding: 30px; background-color: rgba(79, 70, 229, 0.03); border-radius: 10px;">
-                        <p style="color: #374151; font-size: 18px; margin-bottom: 30px; line-height: 1.6;">This is to certify that</p>
+                    <div style="text-align: center; margin: 40px 0; padding: 30px; background-color: rgba(30, 58, 138, 0.03); border-radius: 10px;">
+                        <p style="color: #1f2937; font-size: 18px; margin-bottom: 30px; line-height: 1.6;">This is to certify that</p>
                         
-                        <h3 style="color: #4F46E5; font-size: 36px; margin: 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">\${data.recipientName}</h3>
+                        <h3 style="color: #1e3a8a; font-size: 36px; margin: 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">\${data.recipientName}</h3>
                         
-                        <p style="color: #374151; font-size: 18px; margin: 25px 0; line-height: 1.8;">
+                        <p style="color: #1f2937; font-size: 18px; margin: 25px 0; line-height: 1.8;">
                             has successfully completed the internship program as<br>
-                            <strong style="color: #1F2937; font-size: 20px;">\${data.role}</strong><br>
+                            <strong style="color: #000000; font-size: 20px;">\${data.role}</strong><br>
                             from <strong>\${formatDate(data.certStartDate)}</strong> to <strong>\${formatDate(data.certEndDate)}</strong>
                         </p>
 
-                        <div style="margin: 30px 0; padding: 20px; background-color: white; border-left: 4px solid #10B981; border-radius: 5px;">
-                            <p style="color: #374151; font-size: 16px; margin: 10px 0;">
-                                <strong style="color: #1F2937;">Performance Rating:</strong> <span style="color: #10B981; font-weight: bold;">\${data.performance}</span>
+                        <div style="margin: 30px 0; padding: 20px; background-color: white; border-left: 4px solid #3b82f6; border-radius: 5px;">
+                            <p style="color: #1f2937; font-size: 16px; margin: 10px 0;">
+                                <strong style="color: #000000;">Performance Rating:</strong> <span style="color: #3b82f6; font-weight: bold;">\${data.performance}</span>
                             </p>
                             \${data.achievements ? \`
-                            <p style="color: #374151; font-size: 16px; margin: 15px 0; line-height: 1.6;">
-                                <strong style="color: #1F2937;">Key Contributions:</strong><br>
-                                <span style="color: #6B7280;">\${data.achievements}</span>
+                            <p style="color: #1f2937; font-size: 16px; margin: 15px 0; line-height: 1.6;">
+                                <strong style="color: #000000;">Key Contributions:</strong><br>
+                                <span style="color: #4b5563;">\${data.achievements}</span>
                             </p>
                             \` : ''}
                         </div>
 
-                        <p style="color: #374151; font-size: 16px; margin-top: 30px; line-height: 1.6;">
+                        <p style="color: #1f2937; font-size: 16px; margin-top: 30px; line-height: 1.6;">
                             We appreciate the dedication, hard work, and valuable contributions<br>
                             made during the internship period at Passion 3D World.
                         </p>
@@ -558,28 +593,28 @@ app.get('/certificate', (c) => {
 
                     <!-- Certificate Details -->
                     <div style="margin: 40px 0 30px 0; text-align: center;">
-                        <p style="color: #6B7280; font-size: 14px; margin: 5px 0;">Certificate ID: <strong>\${data.certificateId}</strong></p>
-                        <p style="color: #6B7280; font-size: 14px; margin: 5px 0;">Issue Date: <strong>\${formatDate(data.issueDate)}</strong></p>
+                        <p style="color: #4b5563; font-size: 14px; margin: 5px 0;">Certificate ID: <strong>\${data.certificateId}</strong></p>
+                        <p style="color: #4b5563; font-size: 14px; margin: 5px 0;">Issue Date: <strong>\${formatDate(data.issueDate)}</strong></p>
                     </div>
 
                     <!-- Signatures -->
                     <div style="display: flex; justify-content: space-around; margin-top: 60px; padding-top: 20px;">
                         <div style="text-align: center; width: 40%;">
                             <div style="border-top: 2px solid #000; margin-bottom: 10px;"></div>
-                            <p style="margin: 8px 0; font-size: 16px; font-weight: bold; color: #1F2937;">Rahul Gupta</p>
-                            <p style="margin: 5px 0; font-size: 14px; color: #6B7280;">CEO</p>
-                            <p style="margin: 5px 0; font-size: 14px; color: #6B7280;">Passion 3D World</p>
+                            <p style="margin: 8px 0; font-size: 16px; font-weight: bold; color: #000000;">Rahul Gupta</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #4b5563;">CEO</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #4b5563;">Passion 3D World</p>
                         </div>
                         <div style="text-align: center; width: 40%;">
                             <div style="border-top: 2px solid #000; margin-bottom: 10px;"></div>
-                            <p style="margin: 8px 0; font-size: 16px; font-weight: bold; color: #1F2937;">Company Seal</p>
-                            <p style="margin: 5px 0; font-size: 14px; color: #6B7280;">Official Seal</p>
+                            <p style="margin: 8px 0; font-size: 16px; font-weight: bold; color: #000000;">Company Seal</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #4b5563;">Official Seal</p>
                         </div>
                     </div>
 
                     <!-- Footer -->
-                    <div style="margin-top: 40px; text-align: center; padding-top: 20px; border-top: 2px solid #E5E7EB;">
-                        <p style="color: #9CA3AF; font-size: 11px; line-height: 1.5;">
+                    <div style="margin-top: 40px; text-align: center; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                        <p style="color: #6b7280; font-size: 11px; line-height: 1.5;">
                             Contact: +91 9137361474 | passion3dworld@gmail.com<br>
                             This certificate is issued electronically and is valid without physical signature.
                         </p>
