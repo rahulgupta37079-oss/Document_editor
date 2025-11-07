@@ -21,11 +21,14 @@
   //     "bucket_name": "my-bucket"
   //   }
   // ],
+  // D1 Database Configuration
+  // Uncomment after creating database with: npx wrangler d1 create passion3d-docs-db
+  // Then paste the database_id from the output below
   // "d1_databases": [
   //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
+  //     "binding": "DB",
+  //     "database_name": "passion3d-docs-db",
+  //     "database_id": "YOUR_DATABASE_ID_HERE"
   //   }
   // ],
   // "ai": {

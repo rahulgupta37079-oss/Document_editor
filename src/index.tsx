@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
 type Bindings = {
+  DB?: D1Database;
   GROQ_API_KEY?: string;
   OPENAI_API_KEY?: string;
   GEMINI_API_KEY?: string;
@@ -12,10 +13,12 @@ const app = new Hono<{ Bindings: Bindings }>()
 // Enable CORS for API routes
 app.use('/api/*', cors())
 
-// Smart Templates
+// Smart Templates - Expanded Library
 const templates = {
+  // Original 5 Templates
   'video-editor': {
     name: 'Video Editor Intern',
+    category: 'Creative',
     position: 'Video Editing Intern',
     responsibilities: 'Video Editing and Post-Production, Motion Graphics Design, Color Grading, Audio Mixing, Content Creation for Social Media',
     stipend: 5000,
@@ -23,6 +26,7 @@ const templates = {
   },
   '3d-artist': {
     name: '3D Artist Intern',
+    category: 'Creative',
     position: '3D Modeling and Animation Intern',
     responsibilities: '3D Modeling, Texturing and UV Mapping, Character Animation, Rendering and Lighting, Asset Creation for Games/Films',
     stipend: 6000,
@@ -30,6 +34,7 @@ const templates = {
   },
   'software-tester': {
     name: 'Software Tester Intern',
+    category: 'Technical',
     position: 'Software Testing Intern',
     responsibilities: 'Manual and Automated Testing, Bug Reporting and Tracking, Test Case Design, API Testing, Performance Testing',
     stipend: 4000,
@@ -37,6 +42,7 @@ const templates = {
   },
   'content-creator': {
     name: 'Content Creator Intern',
+    category: 'Creative',
     position: 'Content Development Intern',
     responsibilities: 'Content Writing and Copywriting, Social Media Content Creation, SEO Optimization, Graphic Design, Video Script Writing',
     stipend: 4500,
@@ -44,12 +50,214 @@ const templates = {
   },
   'rnd-generalist': {
     name: 'R&D Generalist',
+    category: 'Technical',
     position: 'Research and Development Intern',
     responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Documentation, Research and Innovation',
     stipend: 5500,
     workLocation: 'Hybrid'
+  },
+  
+  // New Technical Templates
+  'frontend-dev': {
+    name: 'Frontend Developer',
+    category: 'Technical',
+    position: 'Frontend Development Intern',
+    responsibilities: 'React/Vue Development, Responsive Web Design, API Integration, UI/UX Implementation, Performance Optimization, Git Version Control',
+    stipend: 7000,
+    workLocation: 'Hybrid'
+  },
+  'backend-dev': {
+    name: 'Backend Developer',
+    category: 'Technical',
+    position: 'Backend Development Intern',
+    responsibilities: 'API Development, Database Design, Server Management, Authentication Systems, Performance Optimization, Documentation',
+    stipend: 7500,
+    workLocation: 'Work From Home'
+  },
+  'fullstack-dev': {
+    name: 'Full Stack Developer',
+    category: 'Technical',
+    position: 'Full Stack Development Intern',
+    responsibilities: 'End-to-End Web Development, Frontend and Backend Integration, Database Management, DevOps Basics, Code Review',
+    stipend: 8000,
+    workLocation: 'Hybrid'
+  },
+  'mobile-dev': {
+    name: 'Mobile App Developer',
+    category: 'Technical',
+    position: 'Mobile Development Intern',
+    responsibilities: 'iOS/Android Development, React Native/Flutter, API Integration, Mobile UI/UX, App Store Deployment, Testing',
+    stipend: 7500,
+    workLocation: 'Hybrid'
+  },
+  'devops': {
+    name: 'DevOps Engineer',
+    category: 'Technical',
+    position: 'DevOps Intern',
+    responsibilities: 'CI/CD Pipeline Setup, Docker/Kubernetes, Cloud Deployment, Monitoring, Automation Scripts, Infrastructure as Code',
+    stipend: 8000,
+    workLocation: 'Work From Home'
+  },
+  'data-analyst': {
+    name: 'Data Analyst',
+    category: 'Technical',
+    position: 'Data Analytics Intern',
+    responsibilities: 'Data Analysis and Visualization, SQL Queries, Python/R Programming, Excel/Tableau, Statistical Analysis, Report Generation',
+    stipend: 6500,
+    workLocation: 'Hybrid'
+  },
+  'ml-engineer': {
+    name: 'ML Engineer',
+    category: 'Technical',
+    position: 'Machine Learning Intern',
+    responsibilities: 'Machine Learning Model Development, Python/TensorFlow, Data Preprocessing, Model Training, Algorithm Optimization, Research',
+    stipend: 9000,
+    workLocation: 'Hybrid'
+  },
+  
+  // New Creative Templates
+  'graphic-designer': {
+    name: 'Graphic Designer',
+    category: 'Creative',
+    position: 'Graphic Design Intern',
+    responsibilities: 'Visual Design, Brand Identity, Adobe Creative Suite, Social Media Graphics, Print Design, Illustration',
+    stipend: 4500,
+    workLocation: 'Hybrid'
+  },
+  'ui-ux-designer': {
+    name: 'UI/UX Designer',
+    category: 'Creative',
+    position: 'UI/UX Design Intern',
+    responsibilities: 'User Research, Wireframing, Prototyping, Figma/Adobe XD, Usability Testing, Design Systems, User Flows',
+    stipend: 6000,
+    workLocation: 'Hybrid'
+  },
+  'animator': {
+    name: 'Animator',
+    category: 'Creative',
+    position: 'Animation Intern',
+    responsibilities: '2D/3D Animation, Character Animation, Motion Design, After Effects, Storyboarding, Visual Effects',
+    stipend: 5500,
+    workLocation: 'Office'
+  },
+  'photographer': {
+    name: 'Photographer',
+    category: 'Creative',
+    position: 'Photography Intern',
+    responsibilities: 'Product Photography, Event Coverage, Photo Editing, Lightroom/Photoshop, Studio Setup, Portfolio Management',
+    stipend: 4000,
+    workLocation: 'Hybrid'
+  },
+  
+  // New Business Templates
+  'digital-marketing': {
+    name: 'Digital Marketing',
+    category: 'Business',
+    position: 'Digital Marketing Intern',
+    responsibilities: 'Social Media Marketing, SEO/SEM, Email Campaigns, Google Analytics, Content Strategy, Performance Tracking',
+    stipend: 5000,
+    workLocation: 'Work From Home'
+  },
+  'business-analyst': {
+    name: 'Business Analyst',
+    category: 'Business',
+    position: 'Business Analysis Intern',
+    responsibilities: 'Market Research, Data Analysis, Business Requirements, Process Improvement, Stakeholder Communication, Reporting',
+    stipend: 6000,
+    workLocation: 'Hybrid'
+  },
+  'hr-intern': {
+    name: 'HR Specialist',
+    category: 'Business',
+    position: 'Human Resources Intern',
+    responsibilities: 'Recruitment, Employee Onboarding, HR Policies, Performance Management, Training Coordination, Documentation',
+    stipend: 4000,
+    workLocation: 'Office'
+  },
+  'sales-intern': {
+    name: 'Sales Representative',
+    category: 'Business',
+    position: 'Sales Intern',
+    responsibilities: 'Lead Generation, Client Communication, CRM Management, Sales Presentations, Market Analysis, Customer Support',
+    stipend: 4500,
+    workLocation: 'Hybrid'
   }
 }
+
+// Database API endpoints (requires D1 setup)
+// Save document
+app.post('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured', demo: true }, 503)
+    }
+    
+    const { type, candidateName, position, documentData } = await c.req.json()
+    
+    const result = await c.env.DB.prepare(
+      'INSERT INTO documents (type, candidate_name, position, document_data) VALUES (?, ?, ?, ?)'
+    ).bind(type, candidateName, position, JSON.stringify(documentData)).run()
+    
+    return c.json({ success: true, id: result.meta.last_row_id })
+  } catch (error) {
+    return c.json({ error: 'Failed to save document', demo: true }, 500)
+  }
+})
+
+// Get all documents
+app.get('/api/documents', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ documents: [], demo: true })
+    }
+    
+    const { results } = await c.env.DB.prepare(
+      'SELECT id, type, candidate_name, position, created_at FROM documents ORDER BY created_at DESC LIMIT 50'
+    ).all()
+    
+    return c.json({ documents: results })
+  } catch (error) {
+    return c.json({ documents: [], error: 'Failed to fetch documents' }, 500)
+  }
+})
+
+// Get single document
+app.get('/api/documents/:id', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const id = c.req.param('id')
+    const result = await c.env.DB.prepare(
+      'SELECT * FROM documents WHERE id = ?'
+    ).bind(id).first()
+    
+    if (!result) {
+      return c.json({ error: 'Document not found' }, 404)
+    }
+    
+    return c.json({ document: result })
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch document' }, 500)
+  }
+})
+
+// Delete document
+app.delete('/api/documents/:id', async (c) => {
+  try {
+    if (!c.env.DB) {
+      return c.json({ error: 'Database not configured' }, 503)
+    }
+    
+    const id = c.req.param('id')
+    await c.env.DB.prepare('DELETE FROM documents WHERE id = ?').bind(id).run()
+    
+    return c.json({ success: true })
+  } catch (error) {
+    return c.json({ error: 'Failed to delete document' }, 500)
+  }
+})
 
 // API endpoint to get templates
 app.get('/api/templates', (c) => {
@@ -308,13 +516,41 @@ app.get('/offer-letter', (c) => {
                                         Choose a Pre-built Template
                                     </label>
                                     <select id="templateSelector" onchange="applyTemplate()" class="w-full px-3 py-2 border rounded-lg">
-                                        <option value="">-- Select Template --</option>
-                                        <option value="video-editor">Video Editor Intern</option>
-                                        <option value="3d-artist">3D Artist Intern</option>
-                                        <option value="software-tester">Software Tester Intern</option>
-                                        <option value="content-creator">Content Creator Intern</option>
-                                        <option value="rnd-generalist">R&D Generalist</option>
+                                        <option value="">-- Select Template (20 Available) --</option>
+                                        
+                                        <optgroup label="🎨 Creative Roles">
+                                            <option value="video-editor">Video Editor (₹5K, Hybrid)</option>
+                                            <option value="3d-artist">3D Artist (₹6K, Office)</option>
+                                            <option value="content-creator">Content Creator (₹4.5K, WFH)</option>
+                                            <option value="graphic-designer">Graphic Designer (₹4.5K, Hybrid)</option>
+                                            <option value="ui-ux-designer">UI/UX Designer (₹6K, Hybrid)</option>
+                                            <option value="animator">Animator (₹5.5K, Office)</option>
+                                            <option value="photographer">Photographer (₹4K, Hybrid)</option>
+                                        </optgroup>
+                                        
+                                        <optgroup label="💻 Technical Roles">
+                                            <option value="software-tester">Software Tester (₹4K, WFH)</option>
+                                            <option value="rnd-generalist">R&D Generalist (₹5.5K, Hybrid)</option>
+                                            <option value="frontend-dev">Frontend Developer (₹7K, Hybrid)</option>
+                                            <option value="backend-dev">Backend Developer (₹7.5K, WFH)</option>
+                                            <option value="fullstack-dev">Full Stack Developer (₹8K, Hybrid)</option>
+                                            <option value="mobile-dev">Mobile App Developer (₹7.5K, Hybrid)</option>
+                                            <option value="devops">DevOps Engineer (₹8K, WFH)</option>
+                                            <option value="data-analyst">Data Analyst (₹6.5K, Hybrid)</option>
+                                            <option value="ml-engineer">ML Engineer (₹9K, Hybrid)</option>
+                                        </optgroup>
+                                        
+                                        <optgroup label="📊 Business Roles">
+                                            <option value="digital-marketing">Digital Marketing (₹5K, WFH)</option>
+                                            <option value="business-analyst">Business Analyst (₹6K, Hybrid)</option>
+                                            <option value="hr-intern">HR Specialist (₹4K, Office)</option>
+                                            <option value="sales-intern">Sales Representative (₹4.5K, Hybrid)</option>
+                                        </optgroup>
                                     </select>
+                                    <p class="mt-1 text-xs text-gray-400">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Templates auto-fill position, stipend, responsibilities & location
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -455,38 +691,33 @@ app.get('/offer-letter', (c) => {
                 generateDocument();
             });
 
-            // Template data
+            // Template data - Expanded library with 20 templates
             const templates = {
-                'video-editor': {
-                    position: 'Video Editing Intern',
-                    responsibilities: 'Video Editing and Post-Production, Motion Graphics Design, Color Grading, Audio Mixing, Content Creation for Social Media',
-                    stipend: 5000,
-                    workLocation: 'Hybrid'
-                },
-                '3d-artist': {
-                    position: '3D Modeling and Animation Intern',
-                    responsibilities: '3D Modeling, Texturing and UV Mapping, Character Animation, Rendering and Lighting, Asset Creation',
-                    stipend: 6000,
-                    workLocation: 'Office'
-                },
-                'software-tester': {
-                    position: 'Software Testing Intern',
-                    responsibilities: 'Manual and Automated Testing, Bug Reporting, Test Case Design, API Testing, Performance Testing',
-                    stipend: 4000,
-                    workLocation: 'Work From Home'
-                },
-                'content-creator': {
-                    position: 'Content Development Intern',
-                    responsibilities: 'Content Writing, Social Media Management, SEO Optimization, Graphic Design, Video Scripts',
-                    stipend: 4500,
-                    workLocation: 'Work From Home'
-                },
-                'rnd-generalist': {
-                    position: 'Research and Development Intern',
-                    responsibilities: 'Video Creation, 3D Modeling, Software Testing, Content Development, Research and Innovation',
-                    stipend: 5500,
-                    workLocation: 'Hybrid'
-                }
+                // Creative Templates
+                'video-editor': { position: 'Video Editing Intern', stipend: 5000, workLocation: 'Hybrid' },
+                '3d-artist': { position: '3D Modeling and Animation Intern', stipend: 6000, workLocation: 'Office' },
+                'content-creator': { position: 'Content Development Intern', stipend: 4500, workLocation: 'Work From Home' },
+                'graphic-designer': { position: 'Graphic Design Intern', stipend: 4500, workLocation: 'Hybrid' },
+                'ui-ux-designer': { position: 'UI/UX Design Intern', stipend: 6000, workLocation: 'Hybrid' },
+                'animator': { position: 'Animation Intern', stipend: 5500, workLocation: 'Office' },
+                'photographer': { position: 'Photography Intern', stipend: 4000, workLocation: 'Hybrid' },
+                
+                // Technical Templates
+                'software-tester': { position: 'Software Testing Intern', stipend: 4000, workLocation: 'Work From Home' },
+                'rnd-generalist': { position: 'Research and Development Intern', stipend: 5500, workLocation: 'Hybrid' },
+                'frontend-dev': { position: 'Frontend Development Intern', stipend: 7000, workLocation: 'Hybrid' },
+                'backend-dev': { position: 'Backend Development Intern', stipend: 7500, workLocation: 'Work From Home' },
+                'fullstack-dev': { position: 'Full Stack Development Intern', stipend: 8000, workLocation: 'Hybrid' },
+                'mobile-dev': { position: 'Mobile Development Intern', stipend: 7500, workLocation: 'Hybrid' },
+                'devops': { position: 'DevOps Intern', stipend: 8000, workLocation: 'Work From Home' },
+                'data-analyst': { position: 'Data Analytics Intern', stipend: 6500, workLocation: 'Hybrid' },
+                'ml-engineer': { position: 'Machine Learning Intern', stipend: 9000, workLocation: 'Hybrid' },
+                
+                // Business Templates
+                'digital-marketing': { position: 'Digital Marketing Intern', stipend: 5000, workLocation: 'Work From Home' },
+                'business-analyst': { position: 'Business Analysis Intern', stipend: 6000, workLocation: 'Hybrid' },
+                'hr-intern': { position: 'Human Resources Intern', stipend: 4000, workLocation: 'Office' },
+                'sales-intern': { position: 'Sales Intern', stipend: 4500, workLocation: 'Hybrid' }
             };
 
             // Apply template
